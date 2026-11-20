@@ -1,9 +1,9 @@
 ---
 name: rpa-project-pipeline
-description: Runs an RPA/CareFlo portal automation from BRD to test plan by chaining the team's skills in order - portal-knowledge-finder, brd-requirement-extractor, rpa-gap-analyst, then (only after the user confirms) rpa-tech-selector, rpa-solution-design-writer and rpa-test-designer. Use this whenever the user shares a BRD, flowchart or referral/portal automation request and wants the end-to-end flow, says "run the pipeline", "BRD to test", "take this BRD through design", or asks to resume a pipeline already in progress. Not for a single stage on its own; use that stage's skill directly.
+description: Runs an RPA/CareFlo portal automation from BRD to test plan by chaining the team's skills in order - portal-knowledge-finder, brd-requirement-extractor, rpa-gap-analyst, then (only after the user confirms) rpa-tech-selector, rpa-solution-design-writer and rpa-test-designer, and, when Process Studio is chosen, builds the workflow with ae-automation-designer, ae-workflow-gen and ae-code-reviewer. Use this whenever the user shares a BRD, flowchart or referral/portal automation request and wants the end-to-end flow, says "run the pipeline", "BRD to test", "take this BRD through design", or asks to resume a pipeline already in progress. Not for a single stage on its own; use that stage's skill directly.
 ---
 
-# RPA Project Pipeline (BRD → Test)
+# RPA Project Pipeline (BRD → Test → AE Workflow)
 
 You coordinate other skills. Do not do a stage's work from memory. For each
 stage, load the named skill with the Skill tool and follow it.
@@ -20,6 +20,13 @@ stage, load the named skill with the Skill tool and follow it.
 | 4 | Tech selection | `rpa-tech-selector` | Requirements, gap register, stage 1 reuse | Tech decision with effort, cost and risk |
 | 5 | Solution design | `rpa-solution-design-writer` | Requirements, gap register, tech decision | Solution Design Document |
 | 6 | Test design | `rpa-test-designer` | Requirements, SDD | Test cases, synthetic data, traceability matrix |
+| 7a | AE design | `ae-automation-designer` | SDD, requirements, test cases | Workflow plan (sub-workflows, steps, error handling) |
+| 7b | AE workflow generation | `ae-workflow-gen` | Stage 7a plan | Process Studio .psw/.psp files |
+| 7c | AE code review | `ae-code-reviewer` | Stage 7b files | HTML audit report |
+
+Stage 7 runs only when stage 4 chose **Process Studio** or a **hybrid**
+that includes Process Studio. For a hybrid, it covers only the Process
+Studio part.
 
 ## Stage 0: Intake
 
@@ -76,6 +83,24 @@ Run them in order, passing the saved outputs forward. Rules:
 - If any stage reveals a new blocking gap, pause, tell the user, and ask
   whether to go back to stage 3.
 
+## Stage 7: AE workflow build (Process Studio only)
+
+Once stage 6 is done:
+1. If stage 4 didn't choose Process Studio, skip stage 7, mark it
+   `n/a` in the state file, and go to Finish.
+2. Otherwise ask: "Ready to build the Process Studio workflow?" Start only
+   on a yes. Otherwise save state and finish.
+3. **7a** `ae-automation-designer`: plan the workflow from the SDD.
+   Every requirement in scope for Process Studio must map to a step or a
+   sub-workflow.
+4. **7b** `ae-workflow-gen`: generate the files from the 7a plan. Save them in
+   `07-workflow/`.
+5. **7c** `ae-code-reviewer`: review the generated files. If it reports
+   Critical or High findings, fix them with `ae-workflow-gen` and run the
+   review again, up to 2 rounds. Then list any findings still open.
+6. Check that each stage 6 test case has a matching path in the workflow,
+   and flag tests that don't.
+
 ## pipeline-state.md format
 
 ```markdown
@@ -90,6 +115,9 @@ Run them in order, passing the saved outputs forward. Rules:
 | 4 Tech selection | pending | | |
 | 5 Solution design | pending | | |
 | 6 Test design | pending | | |
+| 7a AE design | pending | | |
+| 7b AE workflow gen | pending | | |
+| 7c AE code review | pending | | |
 
 ## Assumptions
 ## Decisions and overrides
@@ -110,8 +138,8 @@ silently.
 
 ## Finish
 
-Once stage 6 is done, list every output file and the open gaps, and say
-which build skill fits the chosen tech for next steps:
-`playwright-portal-developer` (Playwright), `ae-automation-designer`
-(Process Studio), or `brd-flowchart-to-production-ready-drools-rule-engine`
-(rules). Don't start the build unless the user asks.
+When the last stage that applies is done, list every output file, the open
+gaps and any open review findings. If the chosen tech isn't Process Studio,
+suggest the build skill that fits: `playwright-portal-developer`
+(Playwright) or `brd-flowchart-to-production-ready-drools-rule-engine`
+(rules). Don't start that build unless the user asks.

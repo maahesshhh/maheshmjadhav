@@ -1,0 +1,3312 @@
+{
+  "meta": {
+    "project": "Ohioans HomeHealth Care - Referral Bot (Careport) migration to new CareFlo platform",
+    "agency": "Ohioans HomeHealth Care",
+    "brd_version": "1.25",
+    "flowchart_version": null,
+    "generated": "2026-11-20",
+    "inputs": [
+      {
+        "file": "AutomationEdge_Walkthrough_Referral_Bot_Process_Ohioans_Careport_v1.25.docx",
+        "type": "brd",
+        "version": "1.25"
+      }
+    ]
+  },
+  "source_authority": [
+    {
+      "order": 1,
+      "source": "BRD v1.25 body (sections 5.x)",
+      "rule": "Wins over the document history notes"
+    },
+    {
+      "order": 2,
+      "source": "BRD document history",
+      "rule": "Used only when the body does not cover the change"
+    },
+    {
+      "order": 3,
+      "source": "Approved To-Be flow diagram",
+      "rule": "Would win over BRD prose by default, but not supplied (MIS-001)"
+    }
+  ],
+  "scope": {
+    "in_scope": [
+      "BRD sections 5.1-5.31 for the Careport referral portal",
+      "Kantime EMR",
+      "Payer portal login and outcome routing"
+    ],
+    "deferred": [],
+    "removed": [],
+    "excluded_flows": [
+      {
+        "item": "Other referral portals' UI",
+        "reason": "Not described (CON-008)"
+      },
+      {
+        "item": "Coordination team work",
+        "reason": "Not for automation"
+      },
+      {
+        "item": "Per-portal eligibility steps",
+        "reason": "In the separate Payer Portal BRD"
+      }
+    ]
+  },
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "category": "Referral Intake",
+      "title": "Log in to referral portals",
+      "description": "CareFlo logs in to the referral portals (Careport in scope for this BRD) before monitoring.",
+      "type": "process",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.1.1",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [
+        "Careport web app (Chrome)",
+        "OTP via email at login"
+      ],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-002",
+      "category": "Referral Intake",
+      "title": "Monitor new referrals continuously",
+      "description": "CareFlo monitors the referral portal for new referral records continuously (intake coordinators check referrals 24 hours; peak 11am-4pm EST).",
+      "type": "process",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.1.2; 2 (Process Summary)",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [
+        "Careport New Referral tab"
+      ],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-003",
+      "category": "Referral Intake",
+      "title": "Fetch referral data from portal screen",
+      "description": "CareFlo fetches referral data from the referral portal screen; for portals other than Careport go directly to step 5.1.6 (download documents).",
+      "type": "process",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.1.3-5.1.4",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-008"
+      ],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-004",
+      "category": "Referral Intake",
+      "title": "Masked Careport referral handling",
+      "description": "If a Careport referral is masked: send a 'Masked Referral' alert, set Careport Response 'Decision Pending Review' with Comment 'Please unmask.', keep monitoring the referral until it is unmasked, then continue at step 5.1.6.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.1.5",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Alert: Masked Referral"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-005",
+      "category": "Referral Intake",
+      "title": "Non 'Not Placed' status goes to manual",
+      "description": "If the referral record status in Careport New Referral tab is other than 'Not Placed' (Placed Here or Placed Elsewhere), notify the Admission team and flag the record for manual processing.",
+      "type": "error-handling",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.31 / 8.4 Post Sign off observations",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-006",
+      "category": "Referral Portal Response",
+      "title": "Same response for all branch sites",
+      "description": "When the referral source sends a multi-branch request, update the same Response and Comment for all sites, for every accept and decline response.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.1 (all response tables)",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-007",
+      "category": "Medicare Bypass",
+      "title": "Medicare in-area patient on Approval Required list",
+      "description": "If Zip and Primary Insurance are available on the portal screen, the insurance is Medicare, the zip is in the Service Area (zip-only match) and the patient is on the Approval Required List: set Intake Review Flag1 = TRUE and generate an Intake Review Ask. If the Ask decision is Accept: accept the referral (Response 'Yes, Willing to accept patient', Comment 'Hello, we are happy to accept! If we see any issues, we will reach out! Can you confirm we are agency of choice?'), create the chart, generate a Mandatory EMR Ask if mandatory info is missing, and send the chart creation alert. If Decline: decline the referral.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.1.7",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Intake Review Flag1",
+          "Intake Review Ask",
+          "Mandatory EMR Ask",
+          "Alert: chart creation"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": [
+        "ASM-001",
+        "ASM-003"
+      ]
+    },
+    {
+      "id": "REQ-008",
+      "category": "Medicare Bypass",
+      "title": "Medicare in-area patient auto-accepted without PDF extraction",
+      "description": "If Zip and Primary Insurance are available on the portal screen, the insurance is Medicare, the zip is in the Service Area (zip-only match) and the patient is NOT on the Approval Required List: accept the referral (same accept Response/Comment as 5.1.7) and create the chart without downloading/extracting referral documents; generate a Mandatory EMR Ask if mandatory info is missing; send the chart creation alert.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.1.8",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Mandatory EMR Ask",
+          "Alert: chart creation"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-012"
+      ],
+      "assumption_refs": [
+        "ASM-003",
+        "ASM-014"
+      ]
+    },
+    {
+      "id": "REQ-009",
+      "category": "Medicare Bypass",
+      "title": "Medicare out-of-area decline",
+      "description": "If Zip and Primary Insurance are available on the portal screen, the insurance is Medicare and the zip is NOT in the Service Area (zip-only match): decline with Response 'No, unable to accept patient', Response Reason 'Other (See comments)', Comment 'Thank you for thinking of us, however this patient is outside our service area.' and send the Out of Service Area decline alert.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.1.9",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Alert: Out of Service area decline"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-010",
+      "category": "Medicare Bypass",
+      "title": "Non-Medicare or missing data goes to full path",
+      "description": "If Zip and Primary Insurance are available but the insurance is NOT Medicare, or Zip/Primary Insurance are NOT available on the portal screen, continue to document download and extraction (step 5.1.11 onward).",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.1.10",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-011",
+      "category": "Document Extraction",
+      "title": "Extract remaining details from referral PDFs",
+      "description": "Download referral documents from the referral portal and extract remaining referral details from the referral PDFs (digital or scanned).",
+      "type": "process",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.1.11-5.1.12",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [
+        "DocEdge PDF data extraction"
+      ],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-012",
+      "category": "Exception Handling",
+      "title": "Basic Info Missing Ask",
+      "description": "If Patient name or DOB is missing after screen and PDF extraction, generate a Basic Info Missing Ask.",
+      "type": "error-handling",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.1.13",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Basic Info Missing Ask"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-013",
+      "category": "Patient Eligibility",
+      "title": "Approval Required list check (flag 2)",
+      "description": "Check whether the patient is on the Approval Required List. If yes set Intake Review Flag2 = TRUE. In both cases continue to step 5.4 (Kantime report lookup by Patient name and DOB).",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.1.14",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Intake Review Flag2"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Blocked-missing-input",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": [
+        "ASM-001"
+      ]
+    },
+    {
+      "id": "REQ-014",
+      "category": "Data Capture",
+      "title": "Capture 25 referral fields from Careport",
+      "description": "Capture the 25 data items listed in section 5.2 (First/Last name, DOB, Sex at Birth, Facility/Sending Organization, Primary Plan Description, SSN, Primary Plan Number, Address, County, Zip, Primary Care Physician, Race, Marital status, Religion, Patient Phone, Emergency Contacts 1 and 2, Referral ID, Facility Contact, Home Health Order, Discharge Note/Projected Discharge Date, Gender Identity, Referral Source as Facility/Physician, ACO Affiliation (Dashboard > Attributions), Secondary Plan Description and Number) from the Careport tabs named in the table; items 12-14 come from the Referral PDF.",
+      "type": "data-mapping",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.2 (table, S no 1-25)",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-015",
+      "category": "Data Capture",
+      "title": "Extract Home Health Order (services)",
+      "description": "Extract patient services (Home Health Order) from Careport Referral Comments and from referral PDF document types H&P, CRF, F2F, Continuation of Care, DC Order, AVS and Referral.",
+      "type": "data-mapping",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.2 (S no 19)",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [
+        "DocEdge / NLP extraction of services"
+      ],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-016",
+      "category": "Data Capture",
+      "title": "Classify referral source as Facility or Physician",
+      "description": "Referral Source is FACILITY if Careport Admission Information has Location and/or Patient Class and/or Patient Type (Inpatient/Out Patient); otherwise PHYSICIAN.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.2 (S no 22); 5.24 Referral Source table",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-017",
+      "category": "Data Capture",
+      "title": "Discharge note / SOC date drives Discharging status",
+      "description": "Extract Discharge Note from Referral Comments and Projected Discharge Date from Admission Information. If the discharge note has a Start of Care / SOC date, Kantime Intake Status is Discharging.",
+      "type": "data-mapping",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.2 (S no 20; Discharge Notes)",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-018",
+      "category": "Document Handling",
+      "title": "Combine Careport documents into one PDF",
+      "description": "In Careport click Combine Documents > Select All, enter the patient's first name as File Name, click Combine Referral Documents; wait while status is Pending until Completed (takes a couple of minutes); open the combined document (last in list) and save as PDF named '<First name Last name> Intake <MMDDYY>' on SharePoint.",
+      "type": "process",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.3.1-5.3.5",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [
+        "Careport async combine - wait/poll",
+        "SharePoint"
+      ],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-019",
+      "category": "Document Handling",
+      "title": "Print referral when no documents",
+      "description": "If there are no documents, print the referral (Print icon) and save the PDF on SharePoint named '<First name Last name> Intake <MMDDYY>'.",
+      "type": "process",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.3.6-5.3.10",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-020",
+      "category": "Document Handling",
+      "title": "Kantime per-document upload naming",
+      "description": "Upload each Careport document separately to Kantime named '<First name initial(s) and Last name> <Document name in Careport> <MMDDYY>'; if Careport has duplicate document names, suffix '1/2/3'.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.3.6; 5.3.11-5.3.12",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-006"
+      ],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-021",
+      "category": "Kantime Lookup",
+      "title": "Download Referral Management-Intake list 4x daily",
+      "description": "Download Kantime Reports > Custom Reports > Referral management Intake list with Intake Date From = 01/01/2020 at 7am, 12pm, 5pm and 10pm EST. It provides patients in Active, Transfer, Discharge, PSOC, Hold and Non-Admit status.",
+      "type": "integration",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.4.1-5.4.3",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [
+        "Kantime report download (scheduled)"
+      ],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": [
+        "ASM-010"
+      ]
+    },
+    {
+      "id": "REQ-022",
+      "category": "Kantime Lookup",
+      "title": "Download Client Intake list every 30 minutes",
+      "description": "Download Kantime Referral > Client Intake list every 30 minutes with default filters unchanged (all 4 locations; Admit status Intake and Conditionally Accepted).",
+      "type": "integration",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.4.4-5.4.6",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": [
+        "ASM-010"
+      ]
+    },
+    {
+      "id": "REQ-023",
+      "category": "Kantime Lookup",
+      "title": "Route by Kantime report match",
+      "description": "Look up the patient by Patient name and DOB. Found in Referral Management-Intake list: route by status (5.6-5.11). Found in Client Intake list: go to 5.5. Found in both: process per Referral Management-Intake status. Found in neither: treat as new patient.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.4.7-5.4.10",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [
+        "REQ-021",
+        "REQ-022"
+      ],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-024",
+      "category": "Existing Patient",
+      "title": "Client Intake list / Intake status handling",
+      "description": "Patient in Client Intake list (or Intake status in RM-Intake list, 5.6): if Intake Review Flag2 = TRUE generate Intake Review Ask (Accept -> continue; Decline -> decline). Otherwise, or on Accept: (1) accept in Careport with Comment 'Hello! Thank you for the referral. We can accept the patient as we were tracking the patient prior.'; (2) in Kantime Referral > Add New Intake search by Location, Line of Business, First/Last name, DOB with DOB match, open the patient, upload documents to the Intake chart; (3) email intake@ohioanshhc.com with the combined PDF, Subject 'Referral ID- <Patient First Last name> - DOB- Intake and Conditionally accepted status', Body 'The patient is in Intake and Conditionally accepted state in Kantime. Please update patient chart manually. Thankyou Referral Bot'.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.5; 5.6",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Intake Review Ask"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [
+        "SMTP/Outlook email"
+      ],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-025",
+      "category": "Existing Patient",
+      "title": "Active / Recert Due / EOE handling",
+      "description": "Status Active/Recert Due/EOE: Approval-Required Ask handling as 5.5. Otherwise accept with Comment 'Hello! Thank you for the referral and we are able to accept back! This patient is currently on services with us! Please keep us posted on updates 😊'; upload documents in Kantime Documents > Add New with Category 'Resumption packet', Folder 'Resumption'; email To hospitalization@ohioanshhc.com, Intake team and Team email, Cc Marketer email, combined PDF attached, Subject 'Referral ID- <Patient First Last name> - DOB- Active Status- Document uploaded in Kantime', body naming the facility and listing Careport-vs-Kantime mismatches (address+zip, primary plan name, Policy ID/MBI, Home Health Order/discipline).",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.7",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Intake Review Ask"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-026",
+      "category": "Existing Patient",
+      "title": "Transfer / On Hold handling",
+      "description": "Status Transfer/On Hold: same as Active (5.7) including Resumption upload, except email has no Cc, Subject 'Referral ID- <Patient First Last name> - DOB- Transfer Status-- Document uploaded in Kantime', and the mismatch section is omitted ('Email body will be blank if nothing mismatched').",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.8",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-027",
+      "category": "Existing Patient",
+      "title": "Compare Careport vs Kantime for mismatches",
+      "description": "For Active and Transfer/On Hold emails, compare Careport against Kantime for: patient address and zip, primary payer plan name, Policy ID/MBI, Home Health Order/discipline; list only differing items in the email.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.7.3; 5.8.3",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [
+        "REQ-025"
+      ],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-028",
+      "category": "Existing Patient",
+      "title": "PSOC handling",
+      "description": "Status PSOC: Approval-Required Ask handling as 5.5. Otherwise accept with Comment 'Hello! Thank you for the referral, we were planning a SOC with the patient prior to returning back to the hospital! We would be happy to accept back! 😊'; email intake@ohioanshhc.com Cc Marketer, combined PDF, Subject 'Referral ID- <Patient First Last name> - DOB- PSOC status', Body 'The patient is in PSOC state in Kantime. Please update patient chart manually. Thankyou Referral Bot'. No Kantime upload.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.9",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-029",
+      "category": "Existing Patient",
+      "title": "Do not decline/flag active-type statuses",
+      "description": "Do not decline or manual-flag referrals when Kantime status is Active / Transfer / PSOC / EOE / Recert Due / On Hold (except via an Approval Required Ask decision).",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "0.1 Document History v1.12 (Section 11.6)",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-030",
+      "category": "Mandatory Data",
+      "title": "Mandatory EMR Ask for missing payer/policy",
+      "description": "For new or Discharge/Non Admit/Inactive patients, if Plan Description/Payor and Policy ID are not available, generate a Mandatory EMR Ask to get them.",
+      "type": "error-handling",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.10.1; 5.11.1",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Mandatory EMR Ask"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-031",
+      "category": "Mandatory Data",
+      "title": "Medicare: missing address Ask",
+      "description": "If payer = Medicare and patient address is not available, generate a Mandatory EMR Ask for the address.",
+      "type": "error-handling",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.10.2",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Mandatory EMR Ask"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-032",
+      "category": "Medicare Path",
+      "title": "Medicare PO Box address: accept and ask for physical address",
+      "description": "If payer = Medicare and the address is a PO Box: accept with Comment 'Hello, we are happy to accept! If we see any issues, we will reach out! Can you confirm we are agency of choice? Also, please provide physical Address😊', proceed to chart creation (Mandatory EMR Ask if info missing) and send chart creation alert.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.10.3; Doc History v1.16",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Alert: chart creation"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-033",
+      "category": "Medicare Path",
+      "title": "Medicare physical address in-area accept",
+      "description": "If payer = Medicare, physical address (no PO Box) and zip in Service Area (zip-only match): accept (standard accept comment), chart creation, Mandatory EMR Ask if needed, chart creation alert.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.10.4",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Alert: chart creation"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-034",
+      "category": "Medicare Path",
+      "title": "Medicare physical address out-of-area decline",
+      "description": "If payer = Medicare, physical address (no PO Box) and zip NOT in Service Area (zip-only match): decline with the out-of-service-area Response/Comment and send Out of Service area decline alert.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.10.5",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Alert: Out of Service area decline"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-035",
+      "category": "Medicare Path",
+      "title": "Medicare PPS plans auto-acceptance",
+      "description": "Medicare PPS plans are auto-accepted (post go-live change, Doc History v1.14/v1.16); the PPS-specific detail is not present in v1.25 body text beyond 5.10.",
+      "type": "rule",
+      "priority": "Medium",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "0.1 Document History v1.14, v1.16",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": [
+        "ASM-016"
+      ]
+    },
+    {
+      "id": "REQ-036",
+      "category": "Mandatory Data",
+      "title": "Non-Medicare: missing or PO Box address Ask",
+      "description": "If payer = non-Medicare and patient address is not available or is a PO Box, generate a Mandatory EMR Ask to get the patient address.",
+      "type": "error-handling",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.11.2-5.11.3",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Mandatory EMR Ask"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-037",
+      "category": "Service Area",
+      "title": "Non-Medicare zip+county service area check",
+      "description": "For non-Medicare: if Zip with County is NOT in the Service Area, decline (out-of-service-area Response/Comment) and send Out of Service area decline alert; if found, continue to the paediatric check (5.13).",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.11.4-5.11.5",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Alert: Out of Service area decline"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-038",
+      "category": "Service Area",
+      "title": "Get county from patient address",
+      "description": "Get Zip, County and State using the patient address (entered without zip) from a county lookup service; check county lines; match Zip to Service Area sheet column A and '<County> <State code>' to column B.",
+      "type": "integration",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.12.1-5.12.4",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [
+        "Google APIs or Randymajors.org (subject to feasibility)"
+      ],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-004"
+      ],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-039",
+      "category": "Service Area",
+      "title": "County API no value: zip-only fallback",
+      "description": "If the county API returns no county for a non-Medicare referral, bypass county validation and perform the service area check by ZIP only, without generating a Basic Missing Information Ask for county.",
+      "type": "error-handling",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.12 Exception scenario; Doc History v1.25",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-040",
+      "category": "Exception Handling",
+      "title": "PO Box address flags manual + notification",
+      "description": "Address consisting of a PO Box is flagged to manual with notification (post go-live change 12.6), except the Medicare PO Box auto-accept path (5.10.3).",
+      "type": "rule",
+      "priority": "Medium",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "0.1 Document History v1.13 (12.6)",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-013"
+      ],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-041",
+      "category": "Patient Eligibility",
+      "title": "Paediatric patient without paediatric plan: decline",
+      "description": "If the patient is paediatric and the Primary plan is NOT a Paediatric Plan (Purple): decline with Response 'Decline', Reason 'Payer Not Accepted', Comment 'Thank you for thinking of us, however we do not take this plan.'; send 'Paediatric patient but not paediatric plan' decline alert; no further CareFlo action.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.13.1",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Alert: Paediatric patient but not paediatric plan decline"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-005",
+        "CON-003"
+      ],
+      "assumption_refs": [
+        "ASM-002",
+        "ASM-017"
+      ]
+    },
+    {
+      "id": "REQ-042",
+      "category": "Patient Eligibility",
+      "title": "Paediatric plan + exception keyword -> review",
+      "description": "If paediatric patient with Paediatric Plan (Purple) and an exception keyword is found: set Intake Review Flag6 = TRUE and generate an Intake Review Ask (when any intake review flag is set). Accept -> accept, Paediatric chart creation, Mandatory EMR Ask if needed, chart creation alert. Decline -> decline as per Ask response.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.13.2",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Intake Review Flag6",
+          "Intake Review Ask"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-005"
+      ],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-043",
+      "category": "Patient Eligibility",
+      "title": "Paediatric plan, no keyword: auto accept",
+      "description": "If paediatric patient with Paediatric Plan (Purple) and no exception keyword: accept (standard accept comment), create Paediatric chart (Line of Business Paediatric Skilled), Mandatory EMR Ask if needed, chart creation alert.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.13.3; Doc History v1.19",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-005"
+      ],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-044",
+      "category": "Patient Eligibility",
+      "title": "Adult with paediatric plan: decline",
+      "description": "If adult patient (above 18) and Primary plan is a Paediatric Plan (Purple): decline (Response 'Decline', Reason 'Payer Not Accepted', Comment 'Thank you for thinking of us, however we do not take this plan.'), send 'Adult patient with paediatric plan' decline alert, no further action. Otherwise continue to exception keyword check (5.15).",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.14",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Alert: Adult patient with paediatric plan decline"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-005",
+        "CON-003"
+      ],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-045",
+      "category": "Patient Eligibility",
+      "title": "Age boundary for paediatric vs adult",
+      "description": "Age is calculated from DOB in completed years on the processing date; age < 18 is paediatric, age >= 18 is adult.",
+      "type": "rule",
+      "priority": "High",
+      "source": "assumed",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.13 / 5.14 / 5.24 / 5.31",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "assumption",
+      "scope_status": "in_scope",
+      "status": "Assumed",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-005"
+      ],
+      "assumption_refs": [
+        "ASM-002"
+      ]
+    },
+    {
+      "id": "REQ-046",
+      "category": "Exception Keywords",
+      "title": "Read exception keyword list daily",
+      "description": "Read the exception keyword list daily from column L of the Service Area sheet; list is user-maintained and may grow.",
+      "type": "integration",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.15.1",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": [
+        "ASM-008"
+      ]
+    },
+    {
+      "id": "REQ-047",
+      "category": "Exception Keywords",
+      "title": "Keyword search in comments and PDFs",
+      "description": "Search Careport Referral Comments and referral PDFs of type H&P (mainly), CRF, F2F, Continuation of Care, DC Order, AVS and Referral for any exception list item (e.g. 'Infusion'). If found set Intake Review Flag6 = TRUE. Continue to 5.16 in either case.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.15.2-5.15.5",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Intake Review Flag6"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-048",
+      "category": "Payer Identification",
+      "title": "Dummy payor in insurance master: decline",
+      "description": "If the Payor is found in the payor mapping file as Dummy: decline with Response 'No, unable to accept patient', Reason 'Other (See comments)', Comment 'Thank you for thinking of us, however we do not accept this insurance plan in this patient’s area.' and send 'Payor found as Dummy in Insurance master' decline alert.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.16.1",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Alert: Payor found as Dummy decline"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-049",
+      "category": "Payer Identification",
+      "title": "Payor found (non-dummy): continue to UHC/Humana check",
+      "description": "If the Payor is found in the payor mapping file and is not Dummy, continue to 5.17.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.16.2",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-050",
+      "category": "Payer Identification",
+      "title": "Payor not found: identifier match path",
+      "description": "If the Payor is not found in the payor mapping file, go to the Policy ID identifier match path (section 5.30).",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.16.3",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-001"
+      ],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-051",
+      "category": "Payer Identification",
+      "title": "Define Humana and UHC plan descriptions",
+      "description": "Humana plan descriptions = Insurance plan master rows with Payer contract = Red and Payer name on Portal = Humana. UHC plan descriptions = rows with Payer contract = Red and Payer Portal = United Healthcare. Found -> 5.18; not found -> 5.19.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.17",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-052",
+      "category": "Payer Identification",
+      "title": "No UHC/Humana zip limitation decline",
+      "description": "For New/Inactive/Non Admit/Discharged patients: if the patient zip's Service Area column H 'Limitation' is 'NO UHC' or 'No UHC/HUMANA/Devoted' and the plan is a Humana or UHC plan description, decline with Comment 'Thank you for thinking of us, however we are not accepting this insurance in this area at this time.' (Response 'No, unable to accept patient', Reason 'Other (See comments)'), send No UHC/Humana Plan decline alert, and create a Non-Admit chart with reason 'Census at maximum capacity'. Otherwise continue to 5.19.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.18",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Alert: No UHC/Humana Plan decline"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [
+        "REQ-058"
+      ],
+      "conflict_refs": [
+        "CON-010"
+      ],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-053",
+      "category": "Payer Identification",
+      "title": "Agency appropriate plan check",
+      "description": "The patient's Agency Location (Service Area sheet column G) must be in the plan's Associated Agencies (Insurance sheet column F). If yes continue to 5.20; if not decline with Comment 'Thank you for thinking of us, however we do not accept this insurance plan in this patient’s area.' and send 'Not an Agency appropriate plan' decline alert.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.19",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Alert: Not an Agency appropriate plan decline"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-054",
+      "category": "Capacity",
+      "title": "Staffing availability per order",
+      "description": "For each Home Health Order (discipline) check staffing is available ('x') for the patient's zip+county in the Service Area mapping sheet.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.20.1",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-055",
+      "category": "Capacity",
+      "title": "Census at maximum capacity per payer colour",
+      "description": "For each order, if the Service Area sheet lists the primary payer's contract colour (Red and/or Yellow) for that order type, the census is at maximum capacity for that payer type and that order cannot be accepted.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.20.2",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-056",
+      "category": "Capacity",
+      "title": "Decline only when no order can be accepted",
+      "description": "If no patient order (of 1, 2 or 3 orders) can be accepted due to staffing or census, decline with Comment 'Thank you for thinking of us however at this time we have met our census for this payor' (Response 'No, unable to accept patient', Reason 'Other (See comments)'), send 'Met our Census for this payer' decline alert and update CareFlo. If at least one order can be accepted, continue to 5.21 and update CareFlo.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.20.3-5.20.10",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Alert: Met our Census for this payer decline"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": [
+        "ASM-007"
+      ]
+    },
+    {
+      "id": "REQ-057",
+      "category": "Capacity",
+      "title": "Census decline creates Non-Admit chart",
+      "description": "If declined due to census at maximum capacity, create a Non-Admit chart with Reason For Non-Admit 'Census at maximum capacity'.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.20.11",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [
+        "REQ-058"
+      ],
+      "conflict_refs": [
+        "CON-010"
+      ],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-058",
+      "category": "EMR - Kantime",
+      "title": "Non-Admit chart creation steps",
+      "description": "Kantime Referral > Add New Intake; enter Location, Line of Business, First/Last name, DOB with DOB match; Check Duplicate; if patient listed use 3 dots > Readmit, else Admit as New; update General and Payor Source & Eligibility tabs; upload client documents; click Non-Admit, set Reason For Non-Admit, Save.",
+      "type": "process",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.18 i-vii; 5.20; 5.21; 5.29",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-059",
+      "category": "Referral Source Exception",
+      "title": "Restricted facility check applicability",
+      "description": "Applies to new patients only (not Active/PSOC/Transfer/Discharge/Discharge-approval-required), to Facility referrals only (not Physician), on any referral portal, and only when the plan's Payer contract colour is Red or Yellow (not Green).",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.21.1-5.21.3",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-060",
+      "category": "Referral Source Exception",
+      "title": "Restricted facility colour match decline",
+      "description": "If the referral facility is in the Restricted Facility sheet and the plan's Payer contract colour equals a colour listed for that facility (Red only, Yellow only, or both): decline with Response 'Decline', Reason 'Payer Referrals/ Requests at Capacity', Comment 'Thank you for thinking of us, however we are at our census maximum for this payor.', send 'Referral source exception' decline alert, create Non-Admit chart with reason 'Referral Source Management'. Otherwise continue to payer eligibility.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.21.4-5.21.8",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Alert: Referral source exception decline"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [
+        "REQ-058"
+      ],
+      "conflict_refs": [
+        "CON-002",
+        "CON-003"
+      ],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-061",
+      "category": "Referral Source Exception",
+      "title": "Re-read Restricted Facility sheet",
+      "description": "The intake team may update the Facility Restrictions sheet at 6am and 2pm daily; the bot must use the current version.",
+      "type": "nfr",
+      "priority": "Medium",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.21.1",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-062",
+      "category": "Referral Source Exception",
+      "title": "ProMedica location matching",
+      "description": "If Careport sending organization contains 'ProMedica', match the referral Location against column D (format 'Location: PTH', e.g. PTH_F, PTH_F_REHI, PTH, PTH_WWREHI, PTH_WWNS); on match select the corresponding Marketer Email ID and Kantime Facility (column E).",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.21 (Promedica); Doc History v1.13",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-063",
+      "category": "Referral Source Exception",
+      "title": "Bon Secours Mercy Health location matching",
+      "description": "If sending organization is BonSecoursMercyHealthInc: match referral Location to column D (format 'Location: STVZVPB', partial matches allowed - extra letters/numerics handled); if no location match, match the Facility field to column D. On match select Marketer Email ID and Kantime Facility. Rows with column A 'Bon Secours Mercy Health, Inc.' and a Careport Location in column B are restricted facilities.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.21 (Mercy Health)",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": [
+        "ASM-009"
+      ]
+    },
+    {
+      "id": "REQ-064",
+      "category": "Payer Eligibility",
+      "title": "Log in to identified payer portal",
+      "description": "If CareFlo identified the payer portal from the Payor Plan Master, log in. If the portal is not accessible set Intake Review Flag7 = TRUE (Payor portal not accessible). If not identified go to 5.30.",
+      "type": "integration",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.22.1-5.22.2",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Intake Review Flag7"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [
+        "8 payer portals: Ability, UHC, Availity, Priority Health, Ohio Medicaid, Golden Rule, UMR, Mi MCD"
+      ],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-007"
+      ],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-065",
+      "category": "Payer Eligibility",
+      "title": "Patient not found in payer portal",
+      "description": "If login succeeds but the patient is not found, set Intake Review Flag8 = TRUE (Patient not found in payor portal).",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.22.3",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Intake Review Flag8"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-009"
+      ],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-066",
+      "category": "Payer Eligibility",
+      "title": "Primary payer eligibility per Payer Portal BRD",
+      "description": "If the patient is found, perform primary payer eligibility check on the portal as specified in the separate Payer Portal BRD.",
+      "type": "integration",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.22.4",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Blocked-missing-input",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-067",
+      "category": "Payer Eligibility",
+      "title": "Eligible: accept and create/readmit chart",
+      "description": "If primary payer is active and eligible: accept with Comment 'Yes! We would be happy to accept.' and proceed to Readmit (5.23) for Discharged/Inactive/Non-Admit patients or New chart creation (5.24).",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.22.5",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-068",
+      "category": "Payer Eligibility",
+      "title": "Inactive payer -> review flag",
+      "description": "If the primary payer (Medicare or non-Medicare) is inactive, set Intake Review Flag8 = TRUE (Primary payor found Inactive in Payor portal).",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.22.6",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Intake Review Flag8"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-009"
+      ],
+      "assumption_refs": [
+        "ASM-011"
+      ]
+    },
+    {
+      "id": "REQ-069",
+      "category": "Payer Eligibility",
+      "title": "Not eligible: decline, no chart",
+      "description": "If the primary payer is not eligible: decline with Comment 'Thank you for thinking of us, however we do not accept this insurance plan.' (Response 'No, unable to accept patient', Reason 'Other (See comments)') and do not create a Kantime chart.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.22.7",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": [
+        "ASM-011"
+      ]
+    },
+    {
+      "id": "REQ-070",
+      "category": "Exception Handling",
+      "title": "Intake Review Ask when any flag set",
+      "description": "When any Intake Review Flag (1, 2, 6, 7, 8) is TRUE generate an Intake Review Ask; Accept continues the normal path, Decline declines the referral at the portal with no further CareFlo action.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.13.2; 5.30.6.2.1",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Intake Review Ask"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": [
+        "ASM-005",
+        "ASM-006"
+      ]
+    },
+    {
+      "id": "REQ-071",
+      "category": "EMR - Kantime",
+      "title": "Readmit: APPROVAL REQUIRED client alert",
+      "description": "For Discharged status, if Kantime Client Alert shows APPROVAL REQUIRED, send an alert 'Discharge/Non Admit/Inactive patient with Kantime Approval Required' and process manually.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.23.1",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Alert: Kantime Approval Required"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-072",
+      "category": "EMR - Kantime",
+      "title": "Readmit chart steps",
+      "description": "Otherwise: Referral > Add New Intake with Location, Line of Business, First/Last name, DOB (DOB match); 3 dots > Readmit; change Location per Service Area sheet (zip+county) and payer per Insurance sheet; Admit; OK; overwrite all sections with new information per 5.25.",
+      "type": "process",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.23.2-5.23.9",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-073",
+      "category": "EMR - Kantime",
+      "title": "Readmit when duplicate check finds Non-Admit",
+      "description": "During new patient creation, if the duplicate check shows the latest admit status as 'Non-Admit', readmit the patient instead of creating new.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "0.1 Document History v1.15",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-074",
+      "category": "EMR - Kantime",
+      "title": "Location from service area; Monroe override",
+      "description": "Location from Service Area sheet by zip+county; if Kantime Payer is one of 'Blue Cross Blue Shield of MI', 'Medicare Plus Blue', 'Blue Care Network', 'BCN ADVANTAGE', Location = 'Ohioans HHC - Monroe'.",
+      "type": "data-mapping",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.24 New Intake table row 1; Doc History v1.12",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-075",
+      "category": "EMR - Kantime",
+      "title": "Line of Business by age",
+      "description": "Line of Business: Adult Skilled for adults, Paediatric Skilled for paediatric patients.",
+      "type": "data-mapping",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.24 New Intake table row 2",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-005"
+      ],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-076",
+      "category": "EMR - Kantime",
+      "title": "Patient name camel case",
+      "description": "Enter patient name as Last name, First name in camel case; DOB from Careport.",
+      "type": "data-mapping",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.24 rows 3-4",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-077",
+      "category": "EMR - Kantime",
+      "title": "Kantime payer from insurance sheet",
+      "description": "Payer = Kantime payer name from the Insurance mapping sheet for the Primary Plan Description; if the plan description appears in more than one row, use Policy ID identifier validation (5.30) to choose.",
+      "type": "data-mapping",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.24 row 5; Doc History v1.2",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-078",
+      "category": "EMR - Kantime",
+      "title": "Patient information section",
+      "description": "Set Gender, Gender Identity; MBI = Policy ID when plan is Medicare (Row 2); Intake Status = '3- Discharging' if Projected Discharge Date is today or discharge note has SOC date, else '2- Coordination'; Team from Service Area sheet (zip+county).",
+      "type": "data-mapping",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.24 Patient Information table",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-079",
+      "category": "EMR - Kantime",
+      "title": "Non-Medicare Insurance ID",
+      "description": "For non-Medicare (not Row 2) plans, Payor Source and Eligibility > Edit > Insurance ID = Policy ID, Save.",
+      "type": "data-mapping",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.24; Doc History v1.7",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-080",
+      "category": "EMR - Kantime",
+      "title": "Secondary Medicare payer",
+      "description": "If secondary payer is Medicare (Row 2) in Availity, add Secondary Payer with name and Insurance ID (Policy ID) from the referral portal.",
+      "type": "data-mapping",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.24; Doc History v1.9",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-081",
+      "category": "EMR - Kantime",
+      "title": "Referral source section",
+      "description": "Facility referral: radio Facility, Referral Facility = Referral Source mapping column G for Careport facility/sending org in column F, else dummy 'Ohioans HomeHealth Care' (Admission Source 'Hospital'); Facility Contact from Careport (add it if not in dropdown); Admission Source from referral source sheet. Physician referral: radio Physician (PCP). Referring Physician = PCP if found, else leave blank. Never enter Attending Physician.",
+      "type": "data-mapping",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.24 Referral Source table; 5.31 / 8.4",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-082",
+      "category": "EMR - Kantime",
+      "title": "Address from payer portal",
+      "description": "Always update the Kantime address with the payer portal address.",
+      "type": "data-mapping",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.24 Address table",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-013"
+      ],
+      "assumption_refs": [
+        "ASM-012"
+      ]
+    },
+    {
+      "id": "REQ-083",
+      "category": "EMR - Kantime",
+      "title": "Other info, emergency contact, ACO",
+      "description": "Marital Status; Religion (skip if no valid option); Place of Service = Patient's Home/Residence; Emergency Contact (skip if the specified popup appears); ACO Affiliation from Attributions (skip if missing).",
+      "type": "data-mapping",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.24 Other Info / Emergency / ACO tables",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-084",
+      "category": "Document Upload",
+      "title": "Upload referral and payer documents",
+      "description": "Upload referral documents: Category 'Referral Packet', Folder 'Referral'. Upload payer documents from SharePoint: Category 'Eligibility', Folder 'Eligibility'.",
+      "type": "process",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.24 upload steps; Doc History v1.4",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-006"
+      ],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-085",
+      "category": "EMR - Kantime",
+      "title": "Eligibility title by plan type",
+      "description": "In Payer source and eligibility > Edit > pencil: select Commercial AA if Insurance master Commercial = Yes; Medicaid AA if Payer Portal is Ohio Medicaid or Mi MCD; Medicare AA if Medicare = Yes. Applies to new and readmit charts.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.25.1-5.25.6",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Blocked-missing-input",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-086",
+      "category": "EMR - Kantime",
+      "title": "Commercial notes: coverage, deductible, OOP",
+      "description": "For Commercial AA, write notes with Coverage {Project %}, Deductible and Out of Pocket (max/remaining) and Visit Limit (Availity only) from Availity, Ability, UHC, UMR or Cigna; for UMR remaining = max minus total met. Medicaid/Medicare AA notes use the template unchanged.",
+      "type": "data-mapping",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.25.7-5.25.14",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-007"
+      ],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-087",
+      "category": "EMR - Kantime",
+      "title": "Effective period and eligibility status",
+      "description": "Effective start date = current date; Edit Eligibility Status = Eligible, Verified on = current date, Verified by = 'Edge, Automation'; upload portal eligibility documents (Folder Eligibility) and set Eligibility radio; Save.",
+      "type": "process",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.25.15-5.25.21",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-088",
+      "category": "EMR - Kantime",
+      "title": "Team (CC1) update",
+      "description": "Assign and Initial Schedule: CC1 from Referral Source mapping sheet CC1 column by referring facility/physician; dummy facility -> TEAM 2.",
+      "type": "data-mapping",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.26",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-089",
+      "category": "Notification",
+      "title": "Marketer name and email",
+      "description": "Marketer = Sales Person First/Last Name (columns H, I) for Facility (column F) in Referral Source sheet; email in column K; if name contains 'HOUSE' there is no marketer - omit from email.",
+      "type": "data-mapping",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.27",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-090",
+      "category": "Notification",
+      "title": "Team email ID",
+      "description": "Team email = Admission DL column for referring facility/physician; dummy facility -> Team 2 email.",
+      "type": "data-mapping",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.28",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-091",
+      "category": "Manual Decline",
+      "title": "Apply intake team decline from CareFlo",
+      "description": "When the Intake team declines through CareFlo, decline in the portal with the CareFlo comment (column A; for EPIC portal remove 'Thank you for thinking of us however'), Careport Response Reason per the 8-row mapping table, and create a Non-Admit chart with the mapped Kantime Non-Admit reason (column B). Applies to all referral portals.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.29",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [
+        "REQ-058"
+      ],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-092",
+      "category": "Payer Identification",
+      "title": "Plan in one row: agency match",
+      "description": "Plan description in exactly one Insurance Master row: use it if its agency matches the patient's location; else decline (not agency appropriate comment) and send 'Not an Agency appropriate plan' alert.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.30.1-5.30.3",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Alert: Not an Agency appropriate plan decline"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-093",
+      "category": "Payer Identification",
+      "title": "Plan in many rows: agency then identifier",
+      "description": "Plan description in more than one row: keep rows matching the patient's agency location (none -> decline, not agency appropriate); then match Policy ID to the Identifier column; one match -> use it; two or more -> first matching row; none/blank -> Intake Review Flag8 'Identifier not matched so Insurance not run' + Intake Review Ask.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.30.4-5.30.6.3",
+        "page": null,
+        "slide": null,
+        "ids": [
+          "Intake Review Flag8"
+        ]
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-009"
+      ],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-094",
+      "category": "Payer Identification",
+      "title": "Plan not in master: identifier search by agency",
+      "description": "Plan description not in Insurance Master: get agency from zip, filter Insurance Master by Associated agency, match Policy ID to identifiers; first matching row wins; none -> Flag8 + Intake Review Ask.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.30 (Plan Description Not found)",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-095",
+      "category": "Payer Identification",
+      "title": "Identifier Ask outcomes",
+      "description": "Ask = Decline: decline at portal, no further action. Ask = Accept: accept, generate Mandatory EMR Ask if EMR fields missing, then new chart (5.24) or readmit, and upload referral and payer documents.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.30.6.2.1",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-096",
+      "category": "Payer Identification",
+      "title": "Identifier rule = address state + prefix",
+      "description": "Plan identification needs both the patient address state rule and the Policy ID prefix rule; if either fails, notify the Admission team / flag for manual and update CareFlo. The prefix list is configurable and must accept new prefixes without code change.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.31 / 8.4 Post Sign off observations; 5.30 examples",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-097",
+      "category": "Exception Handling",
+      "title": "Email for manual processing when identifier missing",
+      "description": "If the identifier is not listed in the insurance master, send an email request for manual processing.",
+      "type": "error-handling",
+      "priority": "Medium",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "0.1 Document History v1.11 (5.1.16.2)",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-098",
+      "category": "Payer Identification",
+      "title": "Insurance best match",
+      "description": "Use an insurance best-match to identify insurance (v1.23 enhancement 13.3); the algorithm is not described in v1.25.",
+      "type": "rule",
+      "priority": "Medium",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "0.1 Document History v1.23",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Blocked-missing-input",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-099",
+      "category": "CareFlo App",
+      "title": "'Interested' action in CareFlo",
+      "description": "Add 'Interested' to the CareFlo Select Action dropdown with a Comment; the bot then selects 'Interested, but need more information' in Careport with the same comment, then creates the patient chart (Paediatric Skilled if under 18).",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "5.31",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-100",
+      "category": "Referral Source Exception",
+      "title": "Decline by referral source after census check",
+      "description": "Rule for declining the referral based on referral source after the census check (v1.22/v1.23 enhancement 13.2) - implemented as the Restricted Facility check (5.21).",
+      "type": "rule",
+      "priority": "Medium",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "0.1 Document History v1.22, v1.23",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-101",
+      "category": "Logging",
+      "title": "Log all actions to CareFlo DB",
+      "description": "Log every referral's details, decisions, Asks, Alerts and processing status in the CareFlo app database ('Update CareFlo app').",
+      "type": "nfr",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "2 (Process Purpose; Type of Output); 5.20",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": [
+        "ASM-015"
+      ]
+    },
+    {
+      "id": "REQ-102",
+      "category": "Non-Functional",
+      "title": "Respond within 1 hour; speed matters",
+      "description": "Referrals must be answered within 1 hour (current SLA); portals are first-come first-served, so speed is critical (Medicare bypass exists for this reason).",
+      "type": "nfr",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "2 (TAT/SLA); 5.1 title",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-103",
+      "category": "Non-Functional",
+      "title": "Volume 60-90 per day",
+      "description": "Handle 60-90 referrals/day (1,500/month); Careport about 30-40/day; peak 11am-4pm EST.",
+      "type": "nfr",
+      "priority": "Medium",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "2 (Volume; Frequency)",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-104",
+      "category": "Non-Functional",
+      "title": "Applications and access",
+      "description": "Web apps on public URLs in Chrome: Kantime, Careport, Ability, UHC, Availity, Priority Health, Ohio Medicaid, Golden Rule, UMR, Mi MCD, Randymajors.org. Password reset required for Kantime, Careport, Ability, UHC. Email authentication noted. Only Kantime has UAT.",
+      "type": "nfr",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "3 (embedded applications sheet)",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "in_scope",
+      "status": "Extracted",
+      "technology_hints": [
+        "No UAT for Careport or payer portals - testing in production"
+      ],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    },
+    {
+      "id": "REQ-105",
+      "category": "Referral Intake",
+      "title": "Other referral portals' UI",
+      "description": "Screen sequences for AIDIN, Ensocare, Worldview, TriHealth, Christ, Trinity, Faxage, Jotform etc. are not described; their UI automation is outside this BRD.",
+      "type": "process",
+      "priority": "Medium",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "2 (Brief Description); 5.21.2",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "excluded",
+      "status": "Resolved-conflict",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-008"
+      ],
+      "assumption_refs": [
+        "ASM-013"
+      ]
+    },
+    {
+      "id": "REQ-106",
+      "category": "Referral Intake",
+      "title": "Coordination team work",
+      "description": "The Coordination team's work (case manager and patient follow-up, moving patient to client) is marked 'Not for Automation'.",
+      "type": "process",
+      "priority": "Low",
+      "source": "stated",
+      "source_ref": {
+        "doc": "BRD v1.25",
+        "section": "2 (No. of Users)",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "BRD prose",
+      "scope_status": "excluded",
+      "status": "Extracted",
+      "technology_hints": [],
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": []
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "CON-001",
+      "topic": "Broken cross-reference for payor not found",
+      "sources": [
+        {
+          "doc": "BRD v1.25",
+          "says": "5.16.3: proceed to section 5.23 'Get Payer portal ... Using Policy ID Identifier match'"
+        },
+        {
+          "doc": "BRD v1.25",
+          "says": "5.23 is 'Readmit the chart'; the identifier logic is in 5.30"
+        }
+      ],
+      "resolution": "Route to 5.30 (title matches the described step).",
+      "basis": "judgement",
+      "risk": "Low",
+      "affects": [
+        "REQ-050"
+      ]
+    },
+    {
+      "id": "CON-002",
+      "topic": "Restricted facility text duplicated and truncated",
+      "sources": [
+        {
+          "doc": "BRD v1.25",
+          "says": "5.21 Mercy Health block ends mid-sentence ('...same as colour')"
+        },
+        {
+          "doc": "BRD v1.25",
+          "says": "5.21.4-5.21.7 full colour-match rule"
+        }
+      ],
+      "resolution": "Apply the same colour-match rule to Mercy Health.",
+      "basis": "judgement",
+      "risk": "Low",
+      "affects": [
+        "REQ-060",
+        "REQ-063"
+      ]
+    },
+    {
+      "id": "CON-003",
+      "topic": "Decline Response vocabulary differs between sections",
+      "sources": [
+        {
+          "doc": "BRD v1.25",
+          "says": "5.13/5.14/5.21: Response 'Decline', Reasons 'Payer Not Accepted' / 'Payer Referrals/ Requests at Capacity'"
+        },
+        {
+          "doc": "BRD v1.25",
+          "says": "Other sections: 'No, unable to accept patient' / 'Other (See comments)'"
+        }
+      ],
+      "resolution": "Use each section's values as written; confirm the actual Careport dropdown values.",
+      "basis": "judgement",
+      "risk": "Medium",
+      "affects": [
+        "REQ-041",
+        "REQ-044",
+        "REQ-060"
+      ]
+    },
+    {
+      "id": "CON-004",
+      "topic": "County lookup source",
+      "sources": [
+        {
+          "doc": "BRD v1.25",
+          "says": "5.12: Google APIs"
+        },
+        {
+          "doc": "BRD v1.25",
+          "says": "v1.3 and application list: Randymajors.org (subject to feasibility)"
+        }
+      ],
+      "resolution": "Use Google APIs (latest body text); keep the provider configurable.",
+      "basis": "judgement",
+      "risk": "Medium",
+      "affects": [
+        "REQ-038"
+      ]
+    },
+    {
+      "id": "CON-005",
+      "topic": "Age 18 boundary",
+      "sources": [
+        {
+          "doc": "BRD v1.25",
+          "says": "5.13: paediatric 0-18 years; 5.14: adult above 18"
+        },
+        {
+          "doc": "BRD v1.25",
+          "says": "5.24: >18 Adult, <18 Paediatric; 5.31: less than 18 -> Paediatric"
+        }
+      ],
+      "resolution": "Paediatric = under 18 completed years; 18 and above = adult (ASM-002).",
+      "basis": "judgement",
+      "risk": "High",
+      "affects": [
+        "REQ-041",
+        "REQ-042",
+        "REQ-043",
+        "REQ-044",
+        "REQ-045",
+        "REQ-075"
+      ]
+    },
+    {
+      "id": "CON-006",
+      "topic": "Kantime document naming",
+      "sources": [
+        {
+          "doc": "BRD v1.25",
+          "says": "5.3: '<First initials Last name> <Document name in Careport> <MMDDYY>', suffix 1/2/3"
+        },
+        {
+          "doc": "BRD v1.25",
+          "says": "5.24: 'first name, last name intake and then the date'"
+        }
+      ],
+      "resolution": "Use the 5.3 convention for referral packet documents.",
+      "basis": "judgement (more specific)",
+      "risk": "Medium",
+      "affects": [
+        "REQ-020",
+        "REQ-084"
+      ]
+    },
+    {
+      "id": "CON-007",
+      "topic": "Payer portal list",
+      "sources": [
+        {
+          "doc": "BRD v1.25",
+          "says": "Section 2: 8 payer portals; application list has 8 (Ability, UHC, Availity, Priority Health, Ohio Medicaid, Golden Rule, UMR, Mi MCD)"
+        },
+        {
+          "doc": "BRD v1.25",
+          "says": "5.25 also uses Cigna; v1.10 mentions Inovalon"
+        }
+      ],
+      "resolution": "In scope: the 8 listed portals plus Cigna for notes; Inovalon treated as not in scope until confirmed.",
+      "basis": "judgement",
+      "risk": "Medium",
+      "affects": [
+        "REQ-064",
+        "REQ-086"
+      ]
+    },
+    {
+      "id": "CON-008",
+      "topic": "Referral portals in scope",
+      "sources": [
+        {
+          "doc": "BRD v1.25",
+          "says": "Section 2 and 5.21 list 7-14 referral portals"
+        },
+        {
+          "doc": "BRD v1.25",
+          "says": "Screen detail, application list and file name cover Careport only"
+        }
+      ],
+      "resolution": "Careport is the only referral portal UI in scope; business rules are written portal-agnostic.",
+      "basis": "judgement",
+      "risk": "High",
+      "affects": [
+        "REQ-003",
+        "REQ-105"
+      ]
+    },
+    {
+      "id": "CON-009",
+      "topic": "Intake Review Flag8 reused for different reasons",
+      "sources": [
+        {
+          "doc": "BRD v1.25",
+          "says": "5.22: patient not found; primary payor inactive"
+        },
+        {
+          "doc": "BRD v1.25",
+          "says": "5.30: identifier not matched"
+        }
+      ],
+      "resolution": "One Flag8 with a reason text; the Ask shows the reason.",
+      "basis": "judgement",
+      "risk": "Medium",
+      "affects": [
+        "REQ-065",
+        "REQ-068",
+        "REQ-093"
+      ]
+    },
+    {
+      "id": "CON-010",
+      "topic": "Non-Admit reason for No UHC/Humana decline",
+      "sources": [
+        {
+          "doc": "BRD v1.25",
+          "says": "5.18: Non-Admit reason 'Census at maximum capacity'"
+        },
+        {
+          "doc": "BRD v1.25",
+          "says": "Decline comment is about insurance in area, not census; 5.29 has 'Territory at Capacity'"
+        }
+      ],
+      "resolution": "Use 'Census at maximum capacity' as written; confirm.",
+      "basis": "BRD as written",
+      "risk": "Low",
+      "affects": [
+        "REQ-052",
+        "REQ-057"
+      ]
+    },
+    {
+      "id": "CON-012",
+      "topic": "Medicare bypass skips Kantime report lookup",
+      "sources": [
+        {
+          "doc": "BRD v1.25",
+          "says": "5.1.8: accept and create chart directly"
+        },
+        {
+          "doc": "BRD v1.25",
+          "says": "5.4: every referral source must be checked against the two Kantime reports"
+        }
+      ],
+      "resolution": "Bypass accepts directly; chart creation uses Kantime Check Duplicate and readmits when the patient exists (ASM-014).",
+      "basis": "judgement",
+      "risk": "High",
+      "affects": [
+        "REQ-008"
+      ]
+    },
+    {
+      "id": "CON-013",
+      "topic": "PO Box rules and address source",
+      "sources": [
+        {
+          "doc": "BRD v1.25",
+          "says": "v1.13: PO Box -> manual flag + notification; 5.10.3: Medicare PO Box -> accept"
+        },
+        {
+          "doc": "BRD v1.25",
+          "says": "5.24: always use payer portal address, but Medicare bypass does no portal check"
+        }
+      ],
+      "resolution": "Medicare PO Box -> accept as 5.10.3; non-Medicare PO Box -> Mandatory EMR Ask (5.11.3); use referral address when no portal check was done (ASM-012).",
+      "basis": "later version wins",
+      "risk": "Medium",
+      "affects": [
+        "REQ-040",
+        "REQ-082"
+      ]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-001",
+      "statement": "The 'Approval Required List' is a client-maintained list (sheet or Kantime client alert) checked by patient name + DOB.",
+      "reason": "BRD uses it but never defines its source.",
+      "risk": "High",
+      "if_wrong": "Flag1/Flag2 logic and the Ask volume change.",
+      "affects": [
+        "REQ-007",
+        "REQ-013"
+      ],
+      "needs_confirmation": true
+    },
+    {
+      "id": "ASM-002",
+      "statement": "Paediatric = under 18 completed years; 18 and above = adult.",
+      "reason": "CON-005.",
+      "risk": "High",
+      "if_wrong": "18-year-olds get the wrong plan rule and Line of Business.",
+      "affects": [
+        "REQ-045",
+        "REQ-041"
+      ],
+      "needs_confirmation": true
+    },
+    {
+      "id": "ASM-003",
+      "statement": "'Medicare' means the Insurance master Medicare column = Yes (Row 2 plan / MBI).",
+      "reason": "Not defined for the screen-level check.",
+      "risk": "Medium",
+      "if_wrong": "Wrong referrals take the bypass path.",
+      "affects": [
+        "REQ-007",
+        "REQ-008"
+      ],
+      "needs_confirmation": true
+    },
+    {
+      "id": "ASM-005",
+      "statement": "Asks and Alerts are raised in the CareFlo app and answered there by the intake team.",
+      "reason": "Delivery channel not stated.",
+      "risk": "Medium",
+      "if_wrong": "Need email/Teams integration.",
+      "affects": [
+        "REQ-070"
+      ],
+      "needs_confirmation": true
+    },
+    {
+      "id": "ASM-006",
+      "statement": "Intake Review Flags 3, 4 and 5 are not used in this process.",
+      "reason": "Only 1, 2, 6, 7, 8 appear.",
+      "risk": "Low",
+      "if_wrong": "Missing review triggers.",
+      "affects": [
+        "REQ-070"
+      ],
+      "needs_confirmation": true
+    },
+    {
+      "id": "ASM-007",
+      "statement": "The census rule generalises to any number of orders: decline only if no order can be accepted.",
+      "reason": "BRD lists 1-3 orders only.",
+      "risk": "Medium",
+      "if_wrong": "Wrong outcome with 4+ disciplines.",
+      "affects": [
+        "REQ-056"
+      ],
+      "needs_confirmation": true
+    },
+    {
+      "id": "ASM-008",
+      "statement": "The keyword list is read at least once a day and matching is case-insensitive whole-word.",
+      "reason": "Matching rule not stated.",
+      "risk": "Medium",
+      "if_wrong": "False positives/negatives on Flag6.",
+      "affects": [
+        "REQ-046"
+      ],
+      "needs_confirmation": true
+    },
+    {
+      "id": "ASM-009",
+      "statement": "Mercy partial match = normalised 'contains' match after removing spaces/punctuation.",
+      "reason": "'extra letters/numerics handled' is not specified.",
+      "risk": "Medium",
+      "if_wrong": "Restricted facilities missed or over-matched.",
+      "affects": [
+        "REQ-063"
+      ],
+      "needs_confirmation": true
+    },
+    {
+      "id": "ASM-010",
+      "statement": "Up to 30 minutes (Client Intake) and 5 hours (RM-Intake) stale data is accepted.",
+      "reason": "Download schedule fixed by BRD.",
+      "risk": "Medium",
+      "if_wrong": "Recent patients treated as new -> duplicate charts.",
+      "affects": [
+        "REQ-021",
+        "REQ-022"
+      ],
+      "needs_confirmation": true
+    },
+    {
+      "id": "ASM-011",
+      "statement": "'Inactive' = coverage terminated (Flag8 review); 'not eligible' = active but plan not accepted/no HH benefit (decline).",
+      "reason": "BRD does not define the difference.",
+      "risk": "Medium",
+      "if_wrong": "Wrong decline vs review split.",
+      "affects": [
+        "REQ-068",
+        "REQ-069"
+      ],
+      "needs_confirmation": true
+    },
+    {
+      "id": "ASM-012",
+      "statement": "When no payer portal check was done, the Kantime address comes from the referral portal.",
+      "reason": "CON-013.",
+      "risk": "Medium",
+      "if_wrong": "Address left blank or wrong.",
+      "affects": [
+        "REQ-082"
+      ],
+      "needs_confirmation": true
+    },
+    {
+      "id": "ASM-013",
+      "statement": "Only Careport referral UI is in scope for this build.",
+      "reason": "CON-008.",
+      "risk": "High",
+      "if_wrong": "Scope and effort grow significantly.",
+      "affects": [
+        "REQ-105"
+      ],
+      "needs_confirmation": true
+    },
+    {
+      "id": "ASM-014",
+      "statement": "Medicare bypass chart creation runs Kantime Check Duplicate and readmits an existing patient.",
+      "reason": "CON-012.",
+      "risk": "High",
+      "if_wrong": "Duplicate charts for existing patients.",
+      "affects": [
+        "REQ-008"
+      ],
+      "needs_confirmation": true
+    },
+    {
+      "id": "ASM-015",
+      "statement": "'Update CareFlo app' means writing status and decision to the CareFlo database.",
+      "reason": "Not detailed.",
+      "risk": "Low",
+      "if_wrong": "Schema rework.",
+      "affects": [
+        "REQ-101"
+      ],
+      "needs_confirmation": false
+    },
+    {
+      "id": "ASM-016",
+      "statement": "Medicare PPS auto-acceptance is already covered by the Medicare rules in 5.1/5.10.",
+      "reason": "PPS section 12.9 not in v1.25 body.",
+      "risk": "Medium",
+      "if_wrong": "A PPS rule is missing.",
+      "affects": [
+        "REQ-035"
+      ],
+      "needs_confirmation": true
+    },
+    {
+      "id": "ASM-017",
+      "statement": "'Paediatric Plan (Purple)' is a colour/flag column in the Insurance master.",
+      "reason": "Master not supplied.",
+      "risk": "Medium",
+      "if_wrong": "Plan check needs another source.",
+      "affects": [
+        "REQ-041"
+      ],
+      "needs_confirmation": true
+    }
+  ],
+  "missing_inputs": [
+    {
+      "id": "MIS-001",
+      "name": "To-Be process flow diagram (approved by Jaimie, v1.24)",
+      "referenced_in": "BRD 4; Doc History v1.24",
+      "blocks": [
+        "REQ-003",
+        "REQ-008",
+        "REQ-023"
+      ],
+      "working_assumption": "BRD prose is the only authority; it may differ from the approved diagram."
+    },
+    {
+      "id": "MIS-002",
+      "name": "Service Area mapping sheet (Insurance and Service Areas Google sheet)",
+      "referenced_in": "BRD 5.12, 5.15, 5.18, 5.20, 5.23, 5.24",
+      "blocks": [
+        "REQ-037",
+        "REQ-046",
+        "REQ-052",
+        "REQ-054",
+        "REQ-055",
+        "REQ-074"
+      ],
+      "working_assumption": "Columns as described: A Zip, B County+State, G Location, H Limitation, L Exceptions, order columns with x/colours, Team."
+    },
+    {
+      "id": "MIS-003",
+      "name": "Insurance plan master",
+      "referenced_in": "BRD 5.16-5.19, 5.24, 5.25, 5.30",
+      "blocks": [
+        "REQ-048",
+        "REQ-051",
+        "REQ-053",
+        "REQ-093",
+        "REQ-085"
+      ],
+      "working_assumption": "Columns: Plan description, Kantime payer, Identifiers (C), Payer portal, Payer contract colour, Associated agencies (F), Commercial, Medicare, Paediatric flag."
+    },
+    {
+      "id": "MIS-004",
+      "name": "Referral Source mapping sheet",
+      "referenced_in": "BRD 5.24, 5.26-5.28",
+      "blocks": [
+        "REQ-081",
+        "REQ-088",
+        "REQ-089",
+        "REQ-090"
+      ],
+      "working_assumption": "Columns F facility, G Kantime facility, H/I sales person, K email, CC1, Admission DL, Admission Source."
+    },
+    {
+      "id": "MIS-005",
+      "name": "Restricted Facility / Referral Source Exception sheet",
+      "referenced_in": "BRD 5.21",
+      "blocks": [
+        "REQ-060",
+        "REQ-062",
+        "REQ-063"
+      ],
+      "working_assumption": "Format as in 5.21 tables."
+    },
+    {
+      "id": "MIS-006",
+      "name": "Payer Portal BRD",
+      "referenced_in": "BRD 5.22.4",
+      "blocks": [
+        "REQ-066",
+        "REQ-086"
+      ],
+      "working_assumption": "Separate BRD covers per-portal eligibility steps."
+    },
+    {
+      "id": "MIS-007",
+      "name": "Approval Required List",
+      "referenced_in": "BRD 5.1.7, 5.1.14",
+      "blocks": [
+        "REQ-007",
+        "REQ-013"
+      ],
+      "working_assumption": "ASM-001."
+    },
+    {
+      "id": "MIS-008",
+      "name": "Ask/Alert catalogue (texts, recipients, channels)",
+      "referenced_in": "BRD throughout",
+      "blocks": [
+        "REQ-070",
+        "REQ-004"
+      ],
+      "working_assumption": "CareFlo app standard Asks/Alerts."
+    },
+    {
+      "id": "MIS-009",
+      "name": "Eligibility note templates (Commercial/Medicaid/Medicare AA)",
+      "referenced_in": "BRD 5.25",
+      "blocks": [
+        "REQ-085",
+        "REQ-086"
+      ],
+      "working_assumption": "Only in screenshots; to be transcribed."
+    },
+    {
+      "id": "MIS-010",
+      "name": "6 Months Plan description from Careport; Physician Library; Facility Library",
+      "referenced_in": "BRD 0.2 Related Documentation",
+      "blocks": [],
+      "working_assumption": "Reference only."
+    }
+  ],
+  "divergences": [],
+  "technology_hints": [
+    "Careport, Kantime and 8 payer portals are Chrome web apps; OTP/password reset needed for some",
+    "PDF extraction via DocEdge (digital and scanned)",
+    "County lookup via Google APIs or Randymajors.org",
+    "SharePoint document storage",
+    "Email notifications",
+    "Masters in Google Sheets / Excel",
+    "CareFlo app database for Asks, Alerts and logging",
+    "No UAT for Careport or payer portals",
+    "Speed critical: 1-hour SLA, first-come first-served portals"
+  ],
+  "open_questions": [
+    "Is 18 years old paediatric or adult? (CON-005)",
+    "Where does the Approval Required List come from? (MIS-007)",
+    "Confirm only Careport UI is in scope for this build. (CON-008)",
+    "Does the Medicare bypass need the Kantime existing-patient check before accepting? (CON-012)",
+    "Provide the approved To-Be flow diagram. (MIS-001)",
+    "Provide the masters: Service Area, Insurance, Referral Source, Restricted Facility. (MIS-002..005)",
+    "Provide the Payer Portal BRD. (MIS-006)",
+    "Confirm the exact Careport decline Response/Reason values. (CON-003)",
+    "Define 'inactive' vs 'not eligible'. (ASM-011)"
+  ],
+  "counts": {
+    "requirements": 106,
+    "by_category": {
+      "Referral Intake": 7,
+      "Referral Portal Response": 1,
+      "Medicare Bypass": 4,
+      "Document Extraction": 1,
+      "Exception Handling": 4,
+      "Patient Eligibility": 6,
+      "Data Capture": 4,
+      "Document Handling": 3,
+      "Kantime Lookup": 3,
+      "Existing Patient": 6,
+      "Mandatory Data": 3,
+      "Medicare Path": 4,
+      "Service Area": 3,
+      "Exception Keywords": 2,
+      "Payer Identification": 12,
+      "Capacity": 4,
+      "EMR - Kantime": 18,
+      "Referral Source Exception": 6,
+      "Payer Eligibility": 6,
+      "Document Upload": 1,
+      "Notification": 2,
+      "Manual Decline": 1,
+      "CareFlo App": 1,
+      "Logging": 1,
+      "Non-Functional": 3
+    },
+    "by_source": {
+      "stated": 105,
+      "assumed": 1
+    },
+    "by_scope_status": {
+      "in_scope": 104,
+      "excluded": 2
+    },
+    "by_status": {
+      "Extracted": 79,
+      "Resolved-conflict": 22,
+      "Blocked-missing-input": 4,
+      "Assumed": 1
+    },
+    "conflicts": 12,
+    "assumptions": 16,
+    "assumptions_by_risk": {
+      "High": 4,
+      "Medium": 10,
+      "Low": 2
+    },
+    "missing_inputs": 10,
+    "divergences": 0,
+    "coverage_pct": 100.0
+  }
+}

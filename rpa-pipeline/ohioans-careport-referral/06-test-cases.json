@@ -1,0 +1,2516 @@
+{
+  "generated": "2026-11-23",
+  "mode": "A (design, before development)",
+  "cases": [
+    {
+      "reqs": [
+        "REQ-001"
+      ],
+      "type": "functional",
+      "title": "Careport login with OTP",
+      "pre": "Bot account in vault; OTP mailbox reachable",
+      "input": "Valid credentials; OTP email arrives in 30s",
+      "expected": "Login succeeds; session reused for next poll",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-001"
+    },
+    {
+      "reqs": [
+        "REQ-001"
+      ],
+      "type": "negative",
+      "title": "Careport OTP not received",
+      "pre": "OTP mailbox returns nothing for 2 min",
+      "input": "Valid credentials",
+      "expected": "3 retries (1/2/4 min), queue stopped, alert to Intake + AE support; no referral lost",
+      "blocked": null,
+      "question": "Retry/escalation values are design decision DD-11, not BRD",
+      "layer": "UI",
+      "id": "TC-002"
+    },
+    {
+      "reqs": [
+        "REQ-002"
+      ],
+      "type": "functional",
+      "title": "New referral picked up",
+      "pre": "Careport has 1 new Not Placed referral for patient A",
+      "input": "Referral ID CP-T0001",
+      "expected": "Referral appears in CareFlo log within one poll interval (60s, DD-6)",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-003"
+    },
+    {
+      "reqs": [
+        "REQ-002"
+      ],
+      "type": "negative",
+      "title": "Duplicate referral not reprocessed",
+      "pre": "CP-T0001/site OH-1 already in CareFlo log",
+      "input": "Same referral seen again after bot restart",
+      "expected": "Skipped; no second response or chart (DD-2)",
+      "blocked": null,
+      "question": null,
+      "layer": "Workflow",
+      "id": "TC-004"
+    },
+    {
+      "reqs": [
+        "REQ-003"
+      ],
+      "type": "functional",
+      "title": "Careport screen data fetched",
+      "pre": "Referral CP-T0002 for patient A",
+      "input": "Screen populated",
+      "expected": "All available screen fields captured into unified record",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-005"
+    },
+    {
+      "reqs": [
+        "REQ-004"
+      ],
+      "type": "functional",
+      "title": "Masked referral",
+      "pre": "CP-T0003 masked",
+      "input": "Masked flag on screen",
+      "expected": "Alert Masked Referral; Response 'Decision Pending Review', Comment 'Please unmask.'; bot keeps watching; after unmask, continues to 5.1.6",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-006"
+    },
+    {
+      "reqs": [
+        "REQ-004"
+      ],
+      "type": "boundary",
+      "title": "Masked referral placed elsewhere while waiting",
+      "pre": "CP-T0003 masked, then status changes to Placed Elsewhere",
+      "input": "—",
+      "expected": "Watching stops; record flagged manual (REQ-005)",
+      "blocked": null,
+      "question": "BRD does not define when to stop watching (GAP-11)",
+      "layer": "UI",
+      "id": "TC-007"
+    },
+    {
+      "reqs": [
+        "REQ-005"
+      ],
+      "type": "negative",
+      "title": "Status Placed Here",
+      "pre": "CP-T0004 status 'Placed Here'",
+      "input": "—",
+      "expected": "No decision; Admission team notified; record flagged manual",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-008"
+    },
+    {
+      "reqs": [
+        "REQ-005"
+      ],
+      "type": "negative",
+      "title": "Status Placed Elsewhere",
+      "pre": "CP-T0005 status 'Placed Elsewhere'",
+      "input": "—",
+      "expected": "As above",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-009"
+    },
+    {
+      "reqs": [
+        "REQ-006"
+      ],
+      "type": "functional",
+      "title": "Multi-branch response",
+      "pre": "Accept decision; referral sent to 3 sites",
+      "input": "—",
+      "expected": "Same Response + Comment written for all 3 sites",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-010"
+    },
+    {
+      "reqs": [
+        "REQ-007",
+        "REQ-013"
+      ],
+      "type": "functional",
+      "title": "Bypass: Medicare in area, on Approval list",
+      "pre": "Patient A on Approval Required List (synthetic row); zip 43614 in Service Area",
+      "input": "Primary plan 'TEST MEDICARE PART A' mapped Medicare=Yes; zip on screen",
+      "expected": "Flag1 = TRUE; Intake Review Ask; on Accept: Response 'Yes, Willing to accept patient', Comment 'Hello, we are happy to accept! If we see any issues, we will reach out! Can you confirm we are agency of choice?', chart NEW, chart creation alert; on Decline: decline",
+      "blocked": "MIS-002, CON-016 (Medicare column empty)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-011"
+    },
+    {
+      "reqs": [
+        "REQ-008"
+      ],
+      "type": "functional",
+      "title": "Bypass: Medicare in area, not on list, new patient",
+      "pre": "Patient A not in Kantime reports; not on Approval list",
+      "input": "Primary plan 'TEST MEDICARE PART A' mapped Medicare=Yes; zip 43614 on screen",
+      "expected": "Response 'Yes, Willing to accept patient', Comment 'Hello, we are happy to accept! If we see any issues, we will reach out! Can you confirm we are agency of choice?'; no PDF download; chart NEW with duplicate check; chart creation alert; outcome ACCEPT_MEDICARE_BYPASS",
+      "blocked": "MIS-002, CON-016",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-012"
+    },
+    {
+      "reqs": [
+        "REQ-008"
+      ],
+      "type": "regression",
+      "title": "Bypass does not override existing patient (DD-5)",
+      "pre": "Patient A ACTIVE in RM-Intake list",
+      "input": "Primary plan 'TEST MEDICARE PART A' mapped Medicare=Yes; zip in area",
+      "expected": "Routed to Active flow (REQ-025), not bypass; no new chart",
+      "blocked": null,
+      "question": "DD-5 needs business approval (OPEN-6)",
+      "layer": "Rule",
+      "id": "TC-013"
+    },
+    {
+      "reqs": [
+        "REQ-009"
+      ],
+      "type": "functional",
+      "title": "Bypass: Medicare out of area",
+      "pre": "Zip 49999 not in Service Area",
+      "input": "Primary plan 'TEST MEDICARE PART A' mapped Medicare=Yes",
+      "expected": "Response 'No, unable to accept patient', Reason 'Other (See comments)', Comment 'Thank you for thinking of us, however this patient is outside our service area.'; Alert Out of Service area decline; no chart",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-014"
+    },
+    {
+      "reqs": [
+        "REQ-010"
+      ],
+      "type": "functional",
+      "title": "Non-Medicare goes to full path",
+      "pre": "—",
+      "input": "Plan 'TEST COMMERCIAL PPO' on screen",
+      "expected": "Documents downloaded and extracted; full rule call",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-015"
+    },
+    {
+      "reqs": [
+        "REQ-010"
+      ],
+      "type": "negative",
+      "title": "Zip missing on screen",
+      "pre": "Zip blank on screen",
+      "input": "Primary plan 'TEST MEDICARE PART A' mapped Medicare=Yes",
+      "expected": "Full path (download + extract), not bypass",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-016"
+    },
+    {
+      "reqs": [
+        "REQ-011"
+      ],
+      "type": "functional",
+      "title": "PDF extraction digital",
+      "pre": "Synthetic H&P PDF (digital) for patient A",
+      "input": "—",
+      "expected": "Race, marital status, religion, orders extracted with confidence >= threshold",
+      "blocked": null,
+      "question": "Confidence threshold not defined (OPEN-10)",
+      "layer": "DocEdge",
+      "id": "TC-017"
+    },
+    {
+      "reqs": [
+        "REQ-011"
+      ],
+      "type": "negative",
+      "title": "Scanned low-quality PDF",
+      "pre": "Synthetic scanned 150dpi DC Order",
+      "input": "—",
+      "expected": "Low-confidence fields raise Mandatory EMR / Intake Review Ask, never silently accepted",
+      "blocked": null,
+      "question": "OPEN-10",
+      "layer": "DocEdge",
+      "id": "TC-018"
+    },
+    {
+      "reqs": [
+        "REQ-012"
+      ],
+      "type": "negative",
+      "title": "DOB missing",
+      "pre": "Patient name present, DOB blank in screen and PDF",
+      "input": "—",
+      "expected": "Basic Info Missing Ask; no decision until answered",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-019"
+    },
+    {
+      "reqs": [
+        "REQ-012"
+      ],
+      "type": "negative",
+      "title": "Name missing",
+      "pre": "Name blank",
+      "input": "—",
+      "expected": "Basic Info Missing Ask",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-020"
+    },
+    {
+      "reqs": [
+        "REQ-013"
+      ],
+      "type": "functional",
+      "title": "Approval list match",
+      "pre": "Synthetic Approval list row TESTPAT ALPHA 01/15/1950 ACTIVE",
+      "input": "Patient A",
+      "expected": "Flag2 = TRUE",
+      "blocked": null,
+      "question": null,
+      "layer": "JAR",
+      "id": "TC-021"
+    },
+    {
+      "reqs": [
+        "REQ-013"
+      ],
+      "type": "boundary",
+      "title": "Approval list name with punctuation",
+      "pre": "Synthetic row \"O'TEST-SMITH, MARY-ANNE\" 02/02/1960",
+      "input": "Referral name 'Mary Anne Otest Smith'",
+      "expected": "Normalised match = TRUE",
+      "blocked": null,
+      "question": "Matching rule (GAP-08) to confirm",
+      "layer": "JAR",
+      "id": "TC-022"
+    },
+    {
+      "reqs": [
+        "REQ-013"
+      ],
+      "type": "negative",
+      "title": "Approval list same name, different DOB",
+      "pre": "Row TESTPAT ALPHA 01/15/1951",
+      "input": "Patient A (1950)",
+      "expected": "No match",
+      "blocked": null,
+      "question": null,
+      "layer": "JAR",
+      "id": "TC-023"
+    },
+    {
+      "reqs": [
+        "REQ-014"
+      ],
+      "type": "functional",
+      "title": "25 field capture accuracy",
+      "pre": "Synthetic Careport referral with all 25 fields filled",
+      "input": "—",
+      "expected": "Each field equals the expected value in unified record (field-by-field compare)",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-024"
+    },
+    {
+      "reqs": [
+        "REQ-014"
+      ],
+      "type": "negative",
+      "title": "Optional fields empty",
+      "pre": "Race, religion, ACO, secondary plan empty",
+      "input": "—",
+      "expected": "Unified record has nulls; no error",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-025"
+    },
+    {
+      "reqs": [
+        "REQ-015"
+      ],
+      "type": "functional",
+      "title": "Orders from H&P",
+      "pre": "H&P text 'Home health SN and PT evaluation'",
+      "input": "—",
+      "expected": "orders = [SN, PT]",
+      "blocked": null,
+      "question": null,
+      "layer": "DocEdge",
+      "id": "TC-026"
+    },
+    {
+      "reqs": [
+        "REQ-015"
+      ],
+      "type": "negative",
+      "title": "No orders found",
+      "pre": "No services in any document",
+      "input": "—",
+      "expected": "Intake Review Ask (DD-9)",
+      "blocked": null,
+      "question": "DD-9 is a design decision",
+      "layer": "DocEdge",
+      "id": "TC-027"
+    },
+    {
+      "reqs": [
+        "REQ-016"
+      ],
+      "type": "functional",
+      "title": "Facility referral",
+      "pre": "Admission info Patient Type 'Inpatient'",
+      "input": "—",
+      "expected": "sourceType = FACILITY",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-028"
+    },
+    {
+      "reqs": [
+        "REQ-016"
+      ],
+      "type": "functional",
+      "title": "Physician referral",
+      "pre": "Admission Location/Class/Type all blank",
+      "input": "—",
+      "expected": "sourceType = PHYSICIAN",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-029"
+    },
+    {
+      "reqs": [
+        "REQ-017"
+      ],
+      "type": "functional",
+      "title": "Discharge note with SOC date",
+      "pre": "Comment 'SOC 11/25/2026'",
+      "input": "—",
+      "expected": "socDateInNote = TRUE; Kantime Intake Status 3-Discharging",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-030"
+    },
+    {
+      "reqs": [
+        "REQ-018"
+      ],
+      "type": "functional",
+      "title": "Combine documents",
+      "pre": "3 synthetic documents in Careport",
+      "input": "—",
+      "expected": "Combined PDF saved on SharePoint as 'Testpat Alpha Intake 112326'",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-031"
+    },
+    {
+      "reqs": [
+        "REQ-018"
+      ],
+      "type": "negative",
+      "title": "Combine stuck Pending",
+      "pre": "Combine status Pending > 10 min",
+      "input": "—",
+      "expected": "Fallback: download each doc separately (DD-12)",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-032"
+    },
+    {
+      "reqs": [
+        "REQ-019"
+      ],
+      "type": "functional",
+      "title": "No documents: print referral",
+      "pre": "0 documents",
+      "input": "—",
+      "expected": "Printed referral saved as '<First Last> Intake <MMDDYY>'",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-033"
+    },
+    {
+      "reqs": [
+        "REQ-020"
+      ],
+      "type": "functional",
+      "title": "Kantime per-doc naming",
+      "pre": "Docs 'H&P', 'Face Sheet'",
+      "input": "—",
+      "expected": "Uploaded as 'T Alpha H&P 112326', 'T Alpha Face Sheet 112326'",
+      "blocked": null,
+      "question": "Initials format per CON-006 resolution",
+      "layer": "UI",
+      "id": "TC-034"
+    },
+    {
+      "reqs": [
+        "REQ-020"
+      ],
+      "type": "boundary",
+      "title": "Duplicate doc names",
+      "pre": "Two docs named 'Orders'",
+      "input": "—",
+      "expected": "'... Orders 1 ...', '... Orders 2 ...'",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-035"
+    },
+    {
+      "reqs": [
+        "REQ-021"
+      ],
+      "type": "functional",
+      "title": "RM-Intake list schedule",
+      "pre": "Scheduler clock at 07:00, 12:00, 17:00, 22:00 EST",
+      "input": "—",
+      "expected": "Report downloaded at each time with Intake Date From 01/01/2020",
+      "blocked": null,
+      "question": null,
+      "layer": "Workflow",
+      "id": "TC-036"
+    },
+    {
+      "reqs": [
+        "REQ-022"
+      ],
+      "type": "functional",
+      "title": "Client Intake list every 30 min",
+      "pre": "Scheduler",
+      "input": "—",
+      "expected": "Downloaded every 30 min with default filters",
+      "blocked": null,
+      "question": null,
+      "layer": "Workflow",
+      "id": "TC-037"
+    },
+    {
+      "reqs": [
+        "REQ-023"
+      ],
+      "type": "functional",
+      "title": "Found in both reports",
+      "pre": "Patient A in RM-Intake (Active) and Client Intake (Intake)",
+      "input": "—",
+      "expected": "Processed per RM-Intake status (Active)",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-038"
+    },
+    {
+      "reqs": [
+        "REQ-023"
+      ],
+      "type": "functional",
+      "title": "Found in neither",
+      "pre": "Patient A in neither",
+      "input": "—",
+      "expected": "Treated as new patient",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-039"
+    },
+    {
+      "reqs": [
+        "REQ-023"
+      ],
+      "type": "boundary",
+      "title": "Two Kantime patients same name+DOB",
+      "pre": "Two RM-Intake rows for patient A",
+      "input": "—",
+      "expected": "Intake Review Ask (suggested default)",
+      "blocked": null,
+      "question": "GAP-08: multiple-hit rule not in BRD",
+      "layer": "Rule",
+      "id": "TC-040"
+    },
+    {
+      "reqs": [
+        "REQ-024"
+      ],
+      "type": "functional",
+      "title": "Client Intake list patient",
+      "pre": "Patient A in Client Intake, not on Approval list",
+      "input": "—",
+      "expected": "Accept comment 'Hello! Thank you for the referral. We can accept the patient as we were tracking the patient prior.'; docs uploaded to Intake chart; email to intake@ohioanshhc.com with subject 'Referral ID- Testpat Alpha - DOB- Intake and Conditionally accepted status'",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-041"
+    },
+    {
+      "reqs": [
+        "REQ-024"
+      ],
+      "type": "functional",
+      "title": "Client Intake + Approval list, Ask Decline",
+      "pre": "Flag2 TRUE",
+      "input": "Ask answered Decline",
+      "expected": "Referral declined; no upload or email",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-042"
+    },
+    {
+      "reqs": [
+        "REQ-025"
+      ],
+      "type": "functional",
+      "title": "Active patient",
+      "pre": "Patient A Active in RM-Intake",
+      "input": "—",
+      "expected": "Accept with 'currently on services' comment; upload Category Resumption packet / Folder Resumption; email To hospitalization@, Intake, Team; Cc Marketer",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-043"
+    },
+    {
+      "reqs": [
+        "REQ-025",
+        "REQ-027"
+      ],
+      "type": "functional",
+      "title": "Active patient with mismatches",
+      "pre": "Kantime address differs, plan differs",
+      "input": "—",
+      "expected": "Email lists address+zip and plan name mismatches only",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-044"
+    },
+    {
+      "reqs": [
+        "REQ-025"
+      ],
+      "type": "functional",
+      "title": "Recert Due and EOE treated as Active",
+      "pre": "Status Recert Due; then EOE",
+      "input": "—",
+      "expected": "Same as Active",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-045"
+    },
+    {
+      "reqs": [
+        "REQ-026"
+      ],
+      "type": "functional",
+      "title": "Transfer / On Hold",
+      "pre": "Status Transfer",
+      "input": "—",
+      "expected": "Accept; Resumption upload; email subject '... Transfer Status-- Document uploaded in Kantime', no Cc",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-046"
+    },
+    {
+      "reqs": [
+        "REQ-026",
+        "REQ-027"
+      ],
+      "type": "boundary",
+      "title": "Transfer, no mismatches",
+      "pre": "All fields match",
+      "input": "—",
+      "expected": "Mismatch section omitted ('Email body will be blank if nothing mismatched')",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-047"
+    },
+    {
+      "reqs": [
+        "REQ-028"
+      ],
+      "type": "functional",
+      "title": "PSOC",
+      "pre": "Status PSOC",
+      "input": "—",
+      "expected": "Accept with PSOC comment; email intake@ Cc Marketer; no Kantime upload",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-048"
+    },
+    {
+      "reqs": [
+        "REQ-029"
+      ],
+      "type": "regression",
+      "title": "Active statuses never declined",
+      "pre": "Status Active; zip out of area; payer DUMMY",
+      "input": "—",
+      "expected": "Still accepted via Active flow; no decline",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-049"
+    },
+    {
+      "reqs": [
+        "REQ-030"
+      ],
+      "type": "negative",
+      "title": "Payer and policy missing",
+      "pre": "New patient; no plan on screen or PDF",
+      "input": "—",
+      "expected": "Mandatory EMR Ask for Plan Description/Payor and Policy ID",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-050"
+    },
+    {
+      "reqs": [
+        "REQ-031"
+      ],
+      "type": "negative",
+      "title": "Medicare address missing",
+      "pre": "Medicare from PDF; no address",
+      "input": "—",
+      "expected": "Mandatory EMR Ask for address",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-051"
+    },
+    {
+      "reqs": [
+        "REQ-032"
+      ],
+      "type": "functional",
+      "title": "Medicare PO Box accept",
+      "pre": "Address 'PO BOX 123, TOLEDO OH 43614'",
+      "input": "—",
+      "expected": "Accept with '...Also, please provide physical Address😊'; chart NEW; chart creation alert",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-052"
+    },
+    {
+      "reqs": [
+        "REQ-032"
+      ],
+      "type": "boundary",
+      "title": "PO Box variants",
+      "pre": "'P.O. Box 12', 'Post Office Box 12', 'POB 12'",
+      "input": "—",
+      "expected": "All detected as PO Box (DD-7)",
+      "blocked": null,
+      "question": "PO Box patterns are a design decision",
+      "layer": "JAR",
+      "id": "TC-053"
+    },
+    {
+      "reqs": [
+        "REQ-033"
+      ],
+      "type": "functional",
+      "title": "Medicare physical in area",
+      "pre": "Zip 43614 in Service Area",
+      "input": "—",
+      "expected": "Response 'Yes, Willing to accept patient', Comment 'Hello, we are happy to accept! If we see any issues, we will reach out! Can you confirm we are agency of choice?'; chart NEW",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-054"
+    },
+    {
+      "reqs": [
+        "REQ-034"
+      ],
+      "type": "functional",
+      "title": "Medicare physical out of area",
+      "pre": "Zip 49999",
+      "input": "—",
+      "expected": "Response 'No, unable to accept patient', Reason 'Other (See comments)', Comment 'Thank you for thinking of us, however this patient is outside our service area.'; Alert Out of Service area decline",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-055"
+    },
+    {
+      "reqs": [
+        "REQ-035"
+      ],
+      "type": "functional",
+      "title": "Medicare PPS plan",
+      "pre": "Plan 'TEST MEDICARE PPS'",
+      "input": "—",
+      "expected": "Handled as Medicare (ASM-016)",
+      "blocked": null,
+      "question": "PPS rule detail not in v1.25 body",
+      "layer": "Rule",
+      "id": "TC-056"
+    },
+    {
+      "reqs": [
+        "REQ-036"
+      ],
+      "type": "negative",
+      "title": "Non-Medicare PO Box",
+      "pre": "Commercial plan; PO Box address",
+      "input": "—",
+      "expected": "Mandatory EMR Ask for address",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-057"
+    },
+    {
+      "reqs": [
+        "REQ-037"
+      ],
+      "type": "functional",
+      "title": "Non-Medicare zip+county in area",
+      "pre": "Zip 43614 + LUCAS OH in Service Area",
+      "input": "—",
+      "expected": "Continue to paediatric check",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-058"
+    },
+    {
+      "reqs": [
+        "REQ-037"
+      ],
+      "type": "negative",
+      "title": "Zip in area but county not",
+      "pre": "Zip 44882 + WYANDOT OH (only SENECA OH listed)",
+      "input": "—",
+      "expected": "Response 'No, unable to accept patient', Reason 'Other (See comments)', Comment 'Thank you for thinking of us, however this patient is outside our service area.'; Alert Out of Service area decline",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-059"
+    },
+    {
+      "reqs": [
+        "REQ-038"
+      ],
+      "type": "functional",
+      "title": "County API returns county",
+      "pre": "Address without zip",
+      "input": "—",
+      "expected": "Zip, county, state returned and used",
+      "blocked": null,
+      "question": null,
+      "layer": "Integration",
+      "id": "TC-060"
+    },
+    {
+      "reqs": [
+        "REQ-039"
+      ],
+      "type": "boundary",
+      "title": "County API returns no county",
+      "pre": "API returns empty county",
+      "input": "—",
+      "expected": "Zip-only check; NO Basic Missing Info Ask",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-061"
+    },
+    {
+      "reqs": [
+        "REQ-039"
+      ],
+      "type": "negative",
+      "title": "County API error",
+      "pre": "HTTP 500 x3",
+      "input": "—",
+      "expected": "3 retries then zip-only check, logged (DD-13)",
+      "blocked": null,
+      "question": "Error handling is a design decision (GAP-31)",
+      "layer": "Integration",
+      "id": "TC-062"
+    },
+    {
+      "reqs": [
+        "REQ-040"
+      ],
+      "type": "functional",
+      "title": "PO Box flag for non-Medicare",
+      "pre": "Commercial; PO Box",
+      "input": "—",
+      "expected": "Mandatory EMR Ask (per CON-013 resolution)",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-063"
+    },
+    {
+      "reqs": [
+        "REQ-041"
+      ],
+      "type": "functional",
+      "title": "Paediatric, non-paediatric plan",
+      "pre": "Patient B (11); plan not paediatric",
+      "input": "—",
+      "expected": "Response 'Decline', Reason 'Payer Not Accepted', Comment 'Thank you for thinking of us, however we do not take this plan.'; alert; no further action",
+      "blocked": "Paediatric plan flag missing in Payor Mapping (GAP-40)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-064"
+    },
+    {
+      "reqs": [
+        "REQ-042"
+      ],
+      "type": "functional",
+      "title": "Paediatric plan + keyword",
+      "pre": "Patient B; paediatric plan; keyword TRACH",
+      "input": "Ask Accept",
+      "expected": "Flag6; Ask; on Accept accept + Paediatric chart",
+      "blocked": "Paediatric plan flag missing in Payor Mapping (GAP-40)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-065"
+    },
+    {
+      "reqs": [
+        "REQ-043"
+      ],
+      "type": "functional",
+      "title": "Paediatric plan, no keyword",
+      "pre": "Patient B; paediatric plan",
+      "input": "—",
+      "expected": "Response 'Yes, Willing to accept patient', Comment 'Hello, we are happy to accept! If we see any issues, we will reach out! Can you confirm we are agency of choice?'; chart LoB Paediatric Skilled",
+      "blocked": "Paediatric plan flag missing in Payor Mapping (GAP-40)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-066"
+    },
+    {
+      "reqs": [
+        "REQ-044"
+      ],
+      "type": "functional",
+      "title": "Adult with paediatric plan",
+      "pre": "Patient A; paediatric plan",
+      "input": "—",
+      "expected": "Decline 'Payer Not Accepted'; alert",
+      "blocked": "Paediatric plan flag missing in Payor Mapping (GAP-40)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-067"
+    },
+    {
+      "reqs": [
+        "REQ-045"
+      ],
+      "type": "boundary",
+      "title": "Exactly 18 today",
+      "pre": "Patient C",
+      "input": "Processing date 2026-11-23 (fixed clock).",
+      "expected": "Adult (per ASM-002)",
+      "blocked": null,
+      "question": "CON-005: business must confirm 18 = adult",
+      "layer": "Rule",
+      "id": "TC-068"
+    },
+    {
+      "reqs": [
+        "REQ-045"
+      ],
+      "type": "boundary",
+      "title": "17, turns 18 tomorrow",
+      "pre": "Patient D",
+      "input": "Processing date 2026-11-23 (fixed clock).",
+      "expected": "Paediatric",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-069"
+    },
+    {
+      "reqs": [
+        "REQ-046"
+      ],
+      "type": "functional",
+      "title": "Keyword list reload",
+      "pre": "Synthetic keyword master adds 'TESTWORD'",
+      "input": "Next day",
+      "expected": "New keyword used without code change",
+      "blocked": null,
+      "question": null,
+      "layer": "Workflow",
+      "id": "TC-070"
+    },
+    {
+      "reqs": [
+        "REQ-047"
+      ],
+      "type": "functional",
+      "title": "Keyword in referral comment",
+      "pre": "Comment 'Patient on TPN'",
+      "input": "—",
+      "expected": "Flag6 = TRUE; continue to 5.16",
+      "blocked": null,
+      "question": null,
+      "layer": "JAR",
+      "id": "TC-071"
+    },
+    {
+      "reqs": [
+        "REQ-047"
+      ],
+      "type": "functional",
+      "title": "Keyword in H&P PDF",
+      "pre": "H&P contains 'tracheostomy care'",
+      "input": "—",
+      "expected": "Flag6 = TRUE",
+      "blocked": null,
+      "question": null,
+      "layer": "JAR",
+      "id": "TC-072"
+    },
+    {
+      "reqs": [
+        "REQ-047"
+      ],
+      "type": "negative",
+      "title": "Short token false positive",
+      "pre": "Comment 'Ms. Test is ambulatory; magnetic resonance done'",
+      "input": "—",
+      "expected": "No hit for MS or MAG (whole-word, ASM-008)",
+      "blocked": null,
+      "question": "ASM-008/GAP-43 to confirm",
+      "layer": "JAR",
+      "id": "TC-073"
+    },
+    {
+      "reqs": [
+        "REQ-047"
+      ],
+      "type": "boundary",
+      "title": "STAGE I vs STAGE II",
+      "pre": "Comment 'stage II pressure injury'",
+      "input": "—",
+      "expected": "Hit 'STAGE II' only, not 'STAGE I'",
+      "blocked": null,
+      "question": null,
+      "layer": "JAR",
+      "id": "TC-074"
+    },
+    {
+      "reqs": [
+        "REQ-047"
+      ],
+      "type": "negative",
+      "title": "No keyword",
+      "pre": "Comment 'routine PT'",
+      "input": "—",
+      "expected": "No flag",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-075"
+    },
+    {
+      "reqs": [
+        "REQ-048"
+      ],
+      "type": "functional",
+      "title": "DUMMY payer",
+      "pre": "Plan 'TEST ACA DUMMY PLAN' mapped portal DUMMY",
+      "input": "—",
+      "expected": "Decline 'Thank you for thinking of us, however we do not accept this insurance plan in this patient’s area.'; Dummy alert",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-076"
+    },
+    {
+      "reqs": [
+        "REQ-049"
+      ],
+      "type": "functional",
+      "title": "Payer found non-dummy",
+      "pre": "Plan mapped to AVAILITY",
+      "input": "—",
+      "expected": "Continue to UHC/Humana check",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-077"
+    },
+    {
+      "reqs": [
+        "REQ-050"
+      ],
+      "type": "functional",
+      "title": "Payer not found",
+      "pre": "Plan 'TEST UNKNOWN PLAN' not in master",
+      "input": "—",
+      "expected": "Identifier path 5.30",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-078"
+    },
+    {
+      "reqs": [
+        "REQ-051"
+      ],
+      "type": "functional",
+      "title": "Humana plan identification",
+      "pre": "Rows Contract RED + Payor Name on Portal HUMANA",
+      "input": "—",
+      "expected": "Plan classed Humana",
+      "blocked": "Payor Mapping key columns empty (GAP-39)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-079"
+    },
+    {
+      "reqs": [
+        "REQ-052"
+      ],
+      "type": "functional",
+      "title": "No UHC zip + UHC plan",
+      "pre": "Zip limitation 'NO UHC'; UHC plan; new patient",
+      "input": "—",
+      "expected": "Decline '...not accepting this insurance in this area at this time.'; alert; Non-Admit chart reason 'Census at maximum capacity'",
+      "blocked": "MIS-002, Payor Mapping key columns empty (GAP-39)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-080"
+    },
+    {
+      "reqs": [
+        "REQ-052"
+      ],
+      "type": "negative",
+      "title": "No UHC zip + non-UHC plan",
+      "pre": "Limitation 'NO UHC'; Aetna plan",
+      "input": "—",
+      "expected": "Continue to agency check",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-081"
+    },
+    {
+      "reqs": [
+        "REQ-052"
+      ],
+      "type": "boundary",
+      "title": "Existing Active patient in NO UHC zip",
+      "pre": "Status Active",
+      "input": "—",
+      "expected": "Not applied (Active flow)",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-082"
+    },
+    {
+      "reqs": [
+        "REQ-053"
+      ],
+      "type": "functional",
+      "title": "Agency appropriate",
+      "pre": "Location Perrysburg in plan agencies",
+      "input": "—",
+      "expected": "Continue to 5.20",
+      "blocked": "MIS-002, Payor Mapping key columns empty (GAP-39)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-083"
+    },
+    {
+      "reqs": [
+        "REQ-053"
+      ],
+      "type": "negative",
+      "title": "Agency not appropriate",
+      "pre": "Location Monroe; plan agencies Dayton",
+      "input": "—",
+      "expected": "Decline (agency plan comment); alert",
+      "blocked": "MIS-002, Payor Mapping key columns empty (GAP-39)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-084"
+    },
+    {
+      "reqs": [
+        "REQ-054"
+      ],
+      "type": "functional",
+      "title": "Staffing available",
+      "pre": "Order SN staffed 'x'",
+      "input": "—",
+      "expected": "Order acceptable",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-085"
+    },
+    {
+      "reqs": [
+        "REQ-055"
+      ],
+      "type": "functional",
+      "title": "Census full for RED payer",
+      "pre": "PT column 'Red, Yellow'; payer Yellow",
+      "input": "—",
+      "expected": "PT not acceptable",
+      "blocked": "MIS-002, Payor Mapping key columns empty (GAP-39)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-086"
+    },
+    {
+      "reqs": [
+        "REQ-056"
+      ],
+      "type": "boundary",
+      "title": "1 orders, 0 acceptable",
+      "pre": "Synthetic capacity grid",
+      "input": "—",
+      "expected": "Decline 'Thank you for thinking of us however at this time we have met our census for this payor'; alert; CareFlo updated",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-087"
+    },
+    {
+      "reqs": [
+        "REQ-056"
+      ],
+      "type": "boundary",
+      "title": "1 orders, 1 acceptable",
+      "pre": "Synthetic capacity grid",
+      "input": "—",
+      "expected": "Continue to 5.21; CareFlo updated",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-088"
+    },
+    {
+      "reqs": [
+        "REQ-056"
+      ],
+      "type": "boundary",
+      "title": "2 orders, 1 acceptable",
+      "pre": "Synthetic capacity grid",
+      "input": "—",
+      "expected": "Continue to 5.21; CareFlo updated",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-089"
+    },
+    {
+      "reqs": [
+        "REQ-056"
+      ],
+      "type": "boundary",
+      "title": "2 orders, 0 acceptable",
+      "pre": "Synthetic capacity grid",
+      "input": "—",
+      "expected": "Decline 'Thank you for thinking of us however at this time we have met our census for this payor'; alert; CareFlo updated",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-090"
+    },
+    {
+      "reqs": [
+        "REQ-056"
+      ],
+      "type": "boundary",
+      "title": "2 orders, 2 acceptable",
+      "pre": "Synthetic capacity grid",
+      "input": "—",
+      "expected": "Continue to 5.21; CareFlo updated",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-091"
+    },
+    {
+      "reqs": [
+        "REQ-056"
+      ],
+      "type": "boundary",
+      "title": "3 orders, 1 acceptable",
+      "pre": "Synthetic capacity grid",
+      "input": "—",
+      "expected": "Continue to 5.21; CareFlo updated",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-092"
+    },
+    {
+      "reqs": [
+        "REQ-056"
+      ],
+      "type": "boundary",
+      "title": "3 orders, 2 acceptable",
+      "pre": "Synthetic capacity grid",
+      "input": "—",
+      "expected": "Continue to 5.21; CareFlo updated",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-093"
+    },
+    {
+      "reqs": [
+        "REQ-056"
+      ],
+      "type": "boundary",
+      "title": "3 orders, 0 acceptable",
+      "pre": "Synthetic capacity grid",
+      "input": "—",
+      "expected": "Decline 'Thank you for thinking of us however at this time we have met our census for this payor'; alert; CareFlo updated",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-094"
+    },
+    {
+      "reqs": [
+        "REQ-056"
+      ],
+      "type": "boundary",
+      "title": "3 orders, 3 acceptable",
+      "pre": "Synthetic capacity grid",
+      "input": "—",
+      "expected": "Continue to 5.21; CareFlo updated",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-095"
+    },
+    {
+      "reqs": [
+        "REQ-056"
+      ],
+      "type": "boundary",
+      "title": "4 orders, 0 acceptable",
+      "pre": "SN, PT, OT, ST all full",
+      "input": "—",
+      "expected": "Decline (ASM-007)",
+      "blocked": "MIS-002",
+      "question": "BRD only lists up to 3 orders",
+      "layer": "Rule",
+      "id": "TC-096"
+    },
+    {
+      "reqs": [
+        "REQ-057"
+      ],
+      "type": "functional",
+      "title": "Census decline creates Non-Admit",
+      "pre": "Decline DECLINE_CENSUS",
+      "input": "—",
+      "expected": "Non-Admit chart, reason 'Census at maximum capacity'",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-097"
+    },
+    {
+      "reqs": [
+        "REQ-058"
+      ],
+      "type": "functional",
+      "title": "Non-Admit: patient exists in duplicate check",
+      "pre": "Check Duplicate shows patient",
+      "input": "—",
+      "expected": "3 dots > Readmit, then sections, docs, Non-Admit + reason",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-098"
+    },
+    {
+      "reqs": [
+        "REQ-058"
+      ],
+      "type": "functional",
+      "title": "Non-Admit: new patient",
+      "pre": "Check Duplicate empty",
+      "input": "—",
+      "expected": "Admit as New, then Non-Admit",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-099"
+    },
+    {
+      "reqs": [
+        "REQ-059"
+      ],
+      "type": "negative",
+      "title": "Restricted check skipped for Green",
+      "pre": "Facility restricted; plan Green",
+      "input": "—",
+      "expected": "Check not applied",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-100"
+    },
+    {
+      "reqs": [
+        "REQ-059"
+      ],
+      "type": "negative",
+      "title": "Restricted check skipped for Physician referral",
+      "pre": "Physician referral",
+      "input": "—",
+      "expected": "Not applied",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-101"
+    },
+    {
+      "reqs": [
+        "REQ-059"
+      ],
+      "type": "negative",
+      "title": "Restricted check skipped for existing patient",
+      "pre": "Status Transfer",
+      "input": "—",
+      "expected": "Not applied",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-102"
+    },
+    {
+      "reqs": [
+        "REQ-060"
+      ],
+      "type": "functional",
+      "title": "Restricted facility colour match",
+      "pre": "Synthetic row 'TEST GENERAL HOSPITAL' RED, YELLOW; plan Red",
+      "input": "—",
+      "expected": "Decline 'Decline' / 'Payer Referrals/ Requests at Capacity' / '...at our census maximum for this payor.'; alert; Non-Admit 'Referral Source Management'",
+      "blocked": "Payor Mapping key columns empty (GAP-39) (Contract colour)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-103"
+    },
+    {
+      "reqs": [
+        "REQ-060"
+      ],
+      "type": "negative",
+      "title": "Facility restricted for RED only; plan Yellow",
+      "pre": "Row colour RED",
+      "input": "—",
+      "expected": "Continue to payer eligibility",
+      "blocked": "Payor Mapping key columns empty (GAP-39)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-104"
+    },
+    {
+      "reqs": [
+        "REQ-061"
+      ],
+      "type": "functional",
+      "title": "Restricted sheet updated at 14:00",
+      "pre": "Row added at 14:00",
+      "input": "Referral at 14:05",
+      "expected": "New row applied",
+      "blocked": null,
+      "question": null,
+      "layer": "Workflow",
+      "id": "TC-105"
+    },
+    {
+      "reqs": [
+        "REQ-062"
+      ],
+      "type": "functional",
+      "title": "ProMedica location match",
+      "pre": "Sending org 'TEST PROMEDICA HEALTH', location 'Location: PTH_F'",
+      "input": "—",
+      "expected": "Matched; marketer + Kantime facility selected",
+      "blocked": "CON-015 (no location rows)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-106"
+    },
+    {
+      "reqs": [
+        "REQ-063"
+      ],
+      "type": "functional",
+      "title": "Mercy partial location match",
+      "pre": "Location 'Location: STVZVPB2'",
+      "input": "—",
+      "expected": "Partial match TRUE (ASM-009)",
+      "blocked": "CON-015",
+      "question": "GAP-19 examples needed",
+      "layer": "Rule",
+      "id": "TC-107"
+    },
+    {
+      "reqs": [
+        "REQ-064"
+      ],
+      "type": "negative",
+      "title": "Payer portal not accessible",
+      "pre": "Availity login fails x2",
+      "input": "—",
+      "expected": "Flag7; Intake Review Ask",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-108"
+    },
+    {
+      "reqs": [
+        "REQ-065"
+      ],
+      "type": "negative",
+      "title": "Patient not found in portal",
+      "pre": "Search returns no member",
+      "input": "—",
+      "expected": "Flag8 'Patient not found in payor portal'; Ask",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-109"
+    },
+    {
+      "reqs": [
+        "REQ-066"
+      ],
+      "type": "functional",
+      "title": "Eligibility check per portal",
+      "pre": "—",
+      "input": "—",
+      "expected": "DEFERRED: Payer Portal BRD not available",
+      "blocked": "MIS-006 (deferred)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-110"
+    },
+    {
+      "reqs": [
+        "REQ-067"
+      ],
+      "type": "functional",
+      "title": "Eligible: accept + new chart",
+      "pre": "Portal ACTIVE; new patient",
+      "input": "—",
+      "expected": "Accept 'Yes! We would be happy to accept.'; chart NEW",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-111"
+    },
+    {
+      "reqs": [
+        "REQ-067"
+      ],
+      "type": "functional",
+      "title": "Eligible: accept + readmit",
+      "pre": "Portal ACTIVE; Discharged in RM-Intake",
+      "input": "—",
+      "expected": "Accept; READMIT",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-112"
+    },
+    {
+      "reqs": [
+        "REQ-068"
+      ],
+      "type": "negative",
+      "title": "Payer inactive",
+      "pre": "Portal INACTIVE",
+      "input": "—",
+      "expected": "Flag8 'Primary payor found Inactive'; Ask",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-113"
+    },
+    {
+      "reqs": [
+        "REQ-068"
+      ],
+      "type": "boundary",
+      "title": "Future-effective coverage",
+      "pre": "Coverage starts 2026-12-01",
+      "input": "—",
+      "expected": "Flag8 review (suggested)",
+      "blocked": null,
+      "question": "GAP-14 not defined in BRD",
+      "layer": "Rule",
+      "id": "TC-114"
+    },
+    {
+      "reqs": [
+        "REQ-069"
+      ],
+      "type": "negative",
+      "title": "Not eligible",
+      "pre": "Portal NOT_ELIGIBLE",
+      "input": "—",
+      "expected": "Decline '...do not accept this insurance plan.'; no chart",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-115"
+    },
+    {
+      "reqs": [
+        "REQ-070"
+      ],
+      "type": "functional",
+      "title": "Several flags, one Ask",
+      "pre": "Flags 2 and 6 TRUE",
+      "input": "—",
+      "expected": "One Intake Review Ask listing both reasons (DD-10)",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-116"
+    },
+    {
+      "reqs": [
+        "REQ-070"
+      ],
+      "type": "negative",
+      "title": "Ask not answered",
+      "pre": "No answer for 40 min",
+      "input": "—",
+      "expected": "Reminder at 20, escalation at 40 (OPEN-8)",
+      "blocked": null,
+      "question": "Ask SLA not in BRD (GAP-10)",
+      "layer": "Workflow",
+      "id": "TC-117"
+    },
+    {
+      "reqs": [
+        "REQ-071"
+      ],
+      "type": "functional",
+      "title": "Approval Required client alert",
+      "pre": "Discharged; Kantime client alert APPROVAL REQUIRED",
+      "input": "—",
+      "expected": "Alert; manual; no readmit",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-118"
+    },
+    {
+      "reqs": [
+        "REQ-072"
+      ],
+      "type": "functional",
+      "title": "Readmit steps",
+      "pre": "Discharged, no alert",
+      "input": "—",
+      "expected": "Readmit; Location and payer changed per masters; all sections overwritten",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-119"
+    },
+    {
+      "reqs": [
+        "REQ-073"
+      ],
+      "type": "regression",
+      "title": "Duplicate check shows Non-Admit",
+      "pre": "New patient path; duplicate shows latest status Non-Admit",
+      "input": "—",
+      "expected": "Readmit instead of Admit as New",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-120"
+    },
+    {
+      "reqs": [
+        "REQ-074"
+      ],
+      "type": "functional",
+      "title": "Location from service area",
+      "pre": "Zip 43614 → 'Ohioans HHC - Perrysburg' (synthetic)",
+      "input": "—",
+      "expected": "Location set",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "UI",
+      "id": "TC-121"
+    },
+    {
+      "reqs": [
+        "REQ-074"
+      ],
+      "type": "functional",
+      "title": "Monroe override",
+      "pre": "Kantime payer 'Blue Care Network'",
+      "input": "—",
+      "expected": "Location 'Ohioans HHC - Monroe'",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-122"
+    },
+    {
+      "reqs": [
+        "REQ-075"
+      ],
+      "type": "functional",
+      "title": "LoB adult/paediatric",
+      "pre": "Patients A and B",
+      "input": "—",
+      "expected": "Adult Skilled / Paediatric Skilled",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-123"
+    },
+    {
+      "reqs": [
+        "REQ-076"
+      ],
+      "type": "functional",
+      "title": "Camel case name",
+      "pre": "Careport 'TESTPAT ALPHA'",
+      "input": "—",
+      "expected": "Kantime 'Alpha, Testpat'",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-124"
+    },
+    {
+      "reqs": [
+        "REQ-076"
+      ],
+      "type": "boundary",
+      "title": "Name with apostrophe/hyphen/suffix",
+      "pre": "Patient E",
+      "input": "—",
+      "expected": "Per casing rules",
+      "blocked": null,
+      "question": "OPEN-13: no expected value defined",
+      "layer": "UI",
+      "id": "TC-125"
+    },
+    {
+      "reqs": [
+        "REQ-077"
+      ],
+      "type": "functional",
+      "title": "Kantime payer from mapping",
+      "pre": "Plan with EMR Payor Name 'TEST PAYOR!'",
+      "input": "—",
+      "expected": "Payer = 'TEST PAYOR!'",
+      "blocked": "Payor Mapping key columns empty (GAP-39)",
+      "question": null,
+      "layer": "UI",
+      "id": "TC-126"
+    },
+    {
+      "reqs": [
+        "REQ-078"
+      ],
+      "type": "functional",
+      "title": "Patient info section",
+      "pre": "Medicare; discharge date today",
+      "input": "—",
+      "expected": "MBI = policy; Intake Status 3-Discharging; Team from Service Area",
+      "blocked": "MIS-002",
+      "question": null,
+      "layer": "UI",
+      "id": "TC-127"
+    },
+    {
+      "reqs": [
+        "REQ-078"
+      ],
+      "type": "boundary",
+      "title": "Discharge date tomorrow",
+      "pre": "Projected Discharge 2026-11-24",
+      "input": "—",
+      "expected": "Intake Status 2-Coordination",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-128"
+    },
+    {
+      "reqs": [
+        "REQ-079"
+      ],
+      "type": "functional",
+      "title": "Non-Medicare Insurance ID",
+      "pre": "Commercial plan, policy TPOL123",
+      "input": "—",
+      "expected": "Insurance ID = TPOL123",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-129"
+    },
+    {
+      "reqs": [
+        "REQ-080"
+      ],
+      "type": "functional",
+      "title": "Secondary Medicare",
+      "pre": "Secondary 'TEST MEDICARE' policy 1TEST",
+      "input": "—",
+      "expected": "Secondary payer added",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-130"
+    },
+    {
+      "reqs": [
+        "REQ-080"
+      ],
+      "type": "negative",
+      "title": "Secondary non-Medicare",
+      "pre": "Secondary Commercial",
+      "input": "—",
+      "expected": "Not added (GAP-15 to confirm)",
+      "blocked": null,
+      "question": "GAP-15",
+      "layer": "UI",
+      "id": "TC-131"
+    },
+    {
+      "reqs": [
+        "REQ-081"
+      ],
+      "type": "functional",
+      "title": "Facility referral source",
+      "pre": "Facility in Facility Master",
+      "input": "—",
+      "expected": "Facility radio; Kantime facility; admission source",
+      "blocked": "CON-017",
+      "question": null,
+      "layer": "UI",
+      "id": "TC-132"
+    },
+    {
+      "reqs": [
+        "REQ-081"
+      ],
+      "type": "negative",
+      "title": "Facility not in master",
+      "pre": "Unknown facility",
+      "input": "—",
+      "expected": "Dummy 'Ohioans HomeHealth Care', Admission Source 'Hospital'",
+      "blocked": "CON-017 (dummy missing)",
+      "question": null,
+      "layer": "UI",
+      "id": "TC-133"
+    },
+    {
+      "reqs": [
+        "REQ-081"
+      ],
+      "type": "functional",
+      "title": "Physician referral, PCP not found",
+      "pre": "PCP not in Kantime",
+      "input": "—",
+      "expected": "Physician radio; Referring Physician blank; Attending blank",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-134"
+    },
+    {
+      "reqs": [
+        "REQ-082"
+      ],
+      "type": "functional",
+      "title": "Address from payer portal",
+      "pre": "Portal address differs from Careport",
+      "input": "—",
+      "expected": "Kantime = portal address",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-135"
+    },
+    {
+      "reqs": [
+        "REQ-082"
+      ],
+      "type": "boundary",
+      "title": "No portal check (Medicare bypass)",
+      "pre": "Bypass accept",
+      "input": "—",
+      "expected": "Kantime = referral address (ASM-012)",
+      "blocked": null,
+      "question": "ASM-012",
+      "layer": "UI",
+      "id": "TC-136"
+    },
+    {
+      "reqs": [
+        "REQ-083"
+      ],
+      "type": "negative",
+      "title": "Emergency contact popup",
+      "pre": "Popup appears",
+      "input": "—",
+      "expected": "Section skipped; chart saved",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-137"
+    },
+    {
+      "reqs": [
+        "REQ-083"
+      ],
+      "type": "negative",
+      "title": "Religion not in list",
+      "pre": "Religion 'TESTFAITH'",
+      "input": "—",
+      "expected": "Field skipped",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-138"
+    },
+    {
+      "reqs": [
+        "REQ-084"
+      ],
+      "type": "functional",
+      "title": "Upload referral + payer docs",
+      "pre": "Docs on SharePoint",
+      "input": "—",
+      "expected": "Referral Packet/Referral and Eligibility/Eligibility uploads",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-139"
+    },
+    {
+      "reqs": [
+        "REQ-085"
+      ],
+      "type": "functional",
+      "title": "Eligibility title",
+      "pre": "Commercial=Yes / Ohio Medicaid portal / Medicare=Yes",
+      "input": "—",
+      "expected": "Commercial AA / Medicaid AA / Medicare AA",
+      "blocked": "Payor Mapping key columns empty (GAP-39)",
+      "question": null,
+      "layer": "UI",
+      "id": "TC-140"
+    },
+    {
+      "reqs": [
+        "REQ-086"
+      ],
+      "type": "functional",
+      "title": "Commercial notes",
+      "pre": "—",
+      "input": "—",
+      "expected": "DEFERRED (Payer Portal BRD)",
+      "blocked": "MIS-006 (deferred)",
+      "question": null,
+      "layer": "UI",
+      "id": "TC-141"
+    },
+    {
+      "reqs": [
+        "REQ-087"
+      ],
+      "type": "functional",
+      "title": "Eligibility status",
+      "pre": "Any accepted new chart",
+      "input": "Processing date 2026-11-23 (fixed clock).",
+      "expected": "Effective start 11/23/2026; Eligible; Verified on 11/23/2026; Verified by 'Edge, Automation'",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-142"
+    },
+    {
+      "reqs": [
+        "REQ-088"
+      ],
+      "type": "functional",
+      "title": "CC1 from facility",
+      "pre": "Facility with CC1",
+      "input": "—",
+      "expected": "CC1 set",
+      "blocked": "CON-017",
+      "question": null,
+      "layer": "UI",
+      "id": "TC-143"
+    },
+    {
+      "reqs": [
+        "REQ-088"
+      ],
+      "type": "functional",
+      "title": "Dummy facility team",
+      "pre": "Dummy facility",
+      "input": "—",
+      "expected": "TEAM 2",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-144"
+    },
+    {
+      "reqs": [
+        "REQ-089"
+      ],
+      "type": "functional",
+      "title": "Marketer email",
+      "pre": "Facility marketer 'TEST MARKETER'",
+      "input": "—",
+      "expected": "Marketer in Cc",
+      "blocked": "CON-017",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-145"
+    },
+    {
+      "reqs": [
+        "REQ-089"
+      ],
+      "type": "negative",
+      "title": "Marketer HOUSE",
+      "pre": "Sales person 'HOUSE ACCOUNT'",
+      "input": "—",
+      "expected": "Marketer omitted from email",
+      "blocked": "CON-017",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-146"
+    },
+    {
+      "reqs": [
+        "REQ-090"
+      ],
+      "type": "functional",
+      "title": "Team email",
+      "pre": "Facility Admission DL",
+      "input": "—",
+      "expected": "Team email used; dummy → Team 2 email",
+      "blocked": "CON-017",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-147"
+    },
+    {
+      "reqs": [
+        "REQ-091"
+      ],
+      "type": "functional",
+      "title": "Manual decline mapping (8 rows)",
+      "pre": "Intake declines in CareFlo with each of the 8 comments",
+      "input": "—",
+      "expected": "Careport decline with that comment + mapped Response Reason; Non-Admit with mapped reason (8 sub-cases)",
+      "blocked": null,
+      "question": null,
+      "layer": "Workflow",
+      "id": "TC-148"
+    },
+    {
+      "reqs": [
+        "REQ-091"
+      ],
+      "type": "negative",
+      "title": "Unmapped manual comment",
+      "pre": "Free-text comment",
+      "input": "—",
+      "expected": "Not processed automatically; Ask/flag",
+      "blocked": null,
+      "question": "GAP-21",
+      "layer": "Workflow",
+      "id": "TC-149"
+    },
+    {
+      "reqs": [
+        "REQ-092"
+      ],
+      "type": "functional",
+      "title": "Plan one row, agency match",
+      "pre": "1 row, agency matches",
+      "input": "—",
+      "expected": "Row selected",
+      "blocked": "Payor Mapping key columns empty (GAP-39)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-150"
+    },
+    {
+      "reqs": [
+        "REQ-092"
+      ],
+      "type": "negative",
+      "title": "Plan one row, agency mismatch",
+      "pre": "1 row, agency differs",
+      "input": "—",
+      "expected": "Decline agency plan; alert",
+      "blocked": "Payor Mapping key columns empty (GAP-39)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-151"
+    },
+    {
+      "reqs": [
+        "REQ-093"
+      ],
+      "type": "functional",
+      "title": "Multi-row, identifier match",
+      "pre": "Example 1: BLUE CARD POS OOS, policy DXP1675477, MI address",
+      "input": "—",
+      "expected": "Row 13 (Blue Cross Blue Shield of MI)",
+      "blocked": "Payor Mapping key columns empty (GAP-39)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-152"
+    },
+    {
+      "reqs": [
+        "REQ-093"
+      ],
+      "type": "boundary",
+      "title": "Multi-row, two identifier matches",
+      "pre": "Two rows match",
+      "input": "—",
+      "expected": "First matching row",
+      "blocked": "Payor Mapping key columns empty (GAP-39)",
+      "question": "GAP-16 row order",
+      "layer": "Rule",
+      "id": "TC-153"
+    },
+    {
+      "reqs": [
+        "REQ-093"
+      ],
+      "type": "negative",
+      "title": "Multi-row, no identifier match",
+      "pre": "Policy 'ZZZ000'",
+      "input": "—",
+      "expected": "Flag8 'Identifier not matched so Insurance not run'; Ask",
+      "blocked": "Payor Mapping key columns empty (GAP-39)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-154"
+    },
+    {
+      "reqs": [
+        "REQ-094"
+      ],
+      "type": "functional",
+      "title": "Plan not in master, identifier by agency",
+      "pre": "Unknown plan; policy prefix XYK; MI address",
+      "input": "—",
+      "expected": "Row BCN ADVANTAGE selected",
+      "blocked": "Payor Mapping key columns empty (GAP-39)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-155"
+    },
+    {
+      "reqs": [
+        "REQ-095"
+      ],
+      "type": "functional",
+      "title": "Identifier Ask Accept",
+      "pre": "Ask Accept",
+      "input": "—",
+      "expected": "Accept; Mandatory EMR Ask if fields missing; new chart or readmit",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-156"
+    },
+    {
+      "reqs": [
+        "REQ-095"
+      ],
+      "type": "functional",
+      "title": "Identifier Ask Decline",
+      "pre": "Ask Decline",
+      "input": "—",
+      "expected": "Decline; no action",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-157"
+    },
+    {
+      "reqs": [
+        "REQ-096"
+      ],
+      "type": "negative",
+      "title": "Prefix matches but address state does not",
+      "pre": "Prefix DXP; OH address (rule expects MI)",
+      "input": "—",
+      "expected": "Not confirmed; flag manual + notify; CareFlo updated",
+      "blocked": "Payor Mapping key columns empty (GAP-39)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-158"
+    },
+    {
+      "reqs": [
+        "REQ-096"
+      ],
+      "type": "functional",
+      "title": "New prefix added to master",
+      "pre": "Synthetic prefix TST added",
+      "input": "—",
+      "expected": "Used without code change",
+      "blocked": "Payor Mapping key columns empty (GAP-39)",
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-159"
+    },
+    {
+      "reqs": [
+        "REQ-097"
+      ],
+      "type": "functional",
+      "title": "Email when identifier not listed",
+      "pre": "Identifier missing",
+      "input": "—",
+      "expected": "Manual-processing email sent",
+      "blocked": null,
+      "question": "Recipient not defined",
+      "layer": "Rule",
+      "id": "TC-160"
+    },
+    {
+      "reqs": [
+        "REQ-098"
+      ],
+      "type": "functional",
+      "title": "Insurance best match",
+      "pre": "—",
+      "input": "—",
+      "expected": "Cannot test: algorithm not described",
+      "blocked": "REQ-098 Blocked-missing-input",
+      "question": "Define best-match algorithm",
+      "layer": "Rule",
+      "id": "TC-161"
+    },
+    {
+      "reqs": [
+        "REQ-099"
+      ],
+      "type": "functional",
+      "title": "'Interested' action",
+      "pre": "Intake selects Interested + comment",
+      "input": "—",
+      "expected": "Careport 'Interested, but need more information' + same comment; chart created; LoB Paediatric if under 18",
+      "blocked": null,
+      "question": null,
+      "layer": "Workflow",
+      "id": "TC-162"
+    },
+    {
+      "reqs": [
+        "REQ-100"
+      ],
+      "type": "functional",
+      "title": "Referral source decline after census",
+      "pre": "Covered by REQ-060 cases",
+      "input": "—",
+      "expected": "As REQ-060",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-163"
+    },
+    {
+      "reqs": [
+        "REQ-101"
+      ],
+      "type": "functional",
+      "title": "CareFlo log completeness",
+      "pre": "Any processed referral",
+      "input": "—",
+      "expected": "Log row has key, stage timestamps, outcome code, rules fired, rule-set version; SSN/policy/DOB masked",
+      "blocked": null,
+      "question": null,
+      "layer": "Workflow",
+      "id": "TC-164"
+    },
+    {
+      "reqs": [
+        "REQ-101"
+      ],
+      "type": "negative",
+      "title": "PHI masking",
+      "pre": "Referral with synthetic SSN 900-00-0001",
+      "input": "—",
+      "expected": "Log shows only last 4; no screenshots in prod logs",
+      "blocked": null,
+      "question": null,
+      "layer": "Workflow",
+      "id": "TC-165"
+    },
+    {
+      "reqs": [
+        "REQ-102"
+      ],
+      "type": "performance",
+      "title": "1-hour SLA at peak",
+      "pre": "15 synthetic referrals in 1 hour (mix 30% bypass)",
+      "input": "—",
+      "expected": "All answered in Careport within 60 min; bypass within 5 min",
+      "blocked": null,
+      "question": "Bypass 5-min target is a suggestion",
+      "layer": "Workflow",
+      "id": "TC-166"
+    },
+    {
+      "reqs": [
+        "REQ-103"
+      ],
+      "type": "performance",
+      "title": "Daily volume",
+      "pre": "90 synthetic referrals over a day",
+      "input": "—",
+      "expected": "No backlog > 60 min",
+      "blocked": null,
+      "question": null,
+      "layer": "Workflow",
+      "id": "TC-167"
+    },
+    {
+      "reqs": [
+        "REQ-104"
+      ],
+      "type": "functional",
+      "title": "All apps reachable",
+      "pre": "Daily smoke test",
+      "input": "—",
+      "expected": "Login OK for Careport, Kantime, 8 portals",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-168"
+    },
+    {
+      "reqs": [
+        "REQ-107"
+      ],
+      "type": "functional",
+      "title": "NBSP normalisation",
+      "pre": "Restricted row 'TEST GENERAL HOSPITAL'",
+      "input": "Careport 'Test General Hospital'",
+      "expected": "Match",
+      "blocked": null,
+      "question": null,
+      "layer": "JAR",
+      "id": "TC-169"
+    },
+    {
+      "reqs": [
+        "REQ-108"
+      ],
+      "type": "negative",
+      "title": "Inactive master row ignored",
+      "pre": "Restricted row Active=false",
+      "input": "—",
+      "expected": "Not applied",
+      "blocked": null,
+      "question": null,
+      "layer": "JAR",
+      "id": "TC-170"
+    },
+    {
+      "reqs": [
+        "REQ-109"
+      ],
+      "type": "negative",
+      "title": "Payor Portal 'NULL'",
+      "pre": "Plan row portal NULL",
+      "input": "—",
+      "expected": "Treated as not identified → 5.30",
+      "blocked": null,
+      "question": null,
+      "layer": "JAR",
+      "id": "TC-171"
+    },
+    {
+      "reqs": [
+        "REQ-110"
+      ],
+      "type": "functional",
+      "title": "Combined portal value",
+      "pre": "Portal 'ABILITY, AVAILITY'; patient not in Ability",
+      "input": "—",
+      "expected": "Ability tried, then Availity",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-172"
+    },
+    {
+      "reqs": [
+        "REQ-111"
+      ],
+      "type": "functional",
+      "title": "Keyword LoB scope",
+      "pre": "Keyword with LoB Hospice only",
+      "input": "Home Health referral",
+      "expected": "Not applied",
+      "blocked": null,
+      "question": "LoB column is broken in export (GAP-44)",
+      "layer": "JAR",
+      "id": "TC-173"
+    },
+    {
+      "reqs": [
+        "REQ-112"
+      ],
+      "type": "negative",
+      "title": "Master with empty required column",
+      "pre": "Payor Mapping Contract column empty",
+      "input": "Load",
+      "expected": "Load fails validation; alert Intake + CareFlo admin; referrals held (outcome ERROR)",
+      "blocked": null,
+      "question": null,
+      "layer": "Workflow",
+      "id": "TC-174"
+    },
+    {
+      "reqs": [
+        "REQ-112"
+      ],
+      "type": "negative",
+      "title": "Approval list future DOB",
+      "pre": "Synthetic row DOB 02/25/2027",
+      "input": "Load",
+      "expected": "Row reported as invalid; other rows load",
+      "blocked": null,
+      "question": null,
+      "layer": "JAR",
+      "id": "TC-175"
+    },
+    {
+      "reqs": [
+        "REQ-101"
+      ],
+      "type": "negative",
+      "title": "Rule engine contract: schema",
+      "pre": "Each rule-engine response",
+      "input": "—",
+      "expected": "Valid against §8 schema: required outcome, outcomeCode, ruleSetVersion; enum values only",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-176"
+    },
+    {
+      "reqs": [
+        "REQ-101"
+      ],
+      "type": "negative",
+      "title": "Rule engine missing input",
+      "pre": "Request without payer.mappingRows",
+      "input": "—",
+      "expected": "outcome NEED_MORE_DATA with needs list; never a guessed decision",
+      "blocked": null,
+      "question": null,
+      "layer": "Rule",
+      "id": "TC-177"
+    },
+    {
+      "reqs": [
+        "REQ-058"
+      ],
+      "type": "negative",
+      "title": "Accepted but chart fails",
+      "pre": "Kantime save error mid-chart",
+      "input": "—",
+      "expected": "Status 'Accepted - chart pending'; alert; resume via Check Duplicate, no duplicate chart",
+      "blocked": null,
+      "question": null,
+      "layer": "Workflow",
+      "id": "TC-178"
+    },
+    {
+      "reqs": [
+        "REQ-001"
+      ],
+      "type": "negative",
+      "title": "Session expiry mid-flow",
+      "pre": "Kantime session expires at Payor tab",
+      "input": "—",
+      "expected": "Re-login; resume from checkpoint; no duplicate data",
+      "blocked": null,
+      "question": null,
+      "layer": "UI",
+      "id": "TC-179"
+    }
+  ],
+  "uncovered_in_scope": []
+}

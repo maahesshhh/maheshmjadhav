@@ -7,7 +7,7 @@
 | 3 Gap analysis | done r2 | 03-gap-register.md | 47 findings; 7 open critical blockers; GAP-01 resolved, GAP-04 deferred |
 | GATE | approved 2026-11-23 (Proceed) | — | after revise #1. Proceeding with blocked data (GAP-39..42) and assumptions ASM-002, 003, 005, 008, 012, 013, 014, 017; blocked rules stay marked blocked in later stages |
 | 4 Tech selection | done | 04-tech-decision.md | Hybrid: Process Studio (orchestration + Careport/Kantime UI) + Drools rules + Java utility JAR + DocEdge; 4.10 vs runner-up 3.45; est. 480-760 h |
-| 5 Solution design | pending | | |
+| 5 Solution design | done (draft 0.1) | 05-solution-design.md | 4 workflows + rule service + JAR; 17 design decisions to approve; 15 open items. Written as Markdown for pipeline handoff (skill default is a Docs artifact) |
 | 6 Test design | pending | | |
 | 7a AE design | pending | | |
 | 7b AE workflow gen | pending | | |

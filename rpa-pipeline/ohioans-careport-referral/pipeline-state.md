@@ -5,7 +5,7 @@
 | 1 Prior work | skipped | — | no past projects available to search |
 | 2 Requirements | done | 02-requirements.json / .md, 02-open_items.md | 106 reqs (104 in scope), 12 conflicts, 16 assumptions (4 High), 10 missing inputs |
 | 3 Gap analysis | done | 03-gap-register.md | 38 findings; 5 critical blockers |
-| GATE | awaiting user | — | |
+| GATE | revise requested 2026-11-23 | — | waiting for answers to stage 2-3 questions |
 | 4 Tech selection | pending | | |
 | 5 Solution design | pending | | |
 | 6 Test design | pending | | |

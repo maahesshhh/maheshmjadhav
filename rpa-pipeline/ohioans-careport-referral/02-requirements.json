@@ -10,8 +10,34 @@
         "file": "AutomationEdge_Walkthrough_Referral_Bot_Process_Ohioans_Careport_v1.25.docx",
         "type": "brd",
         "version": "1.25"
+      },
+      {
+        "file": "approval_required_list.xlsx",
+        "type": "master",
+        "version": "2026-11-23"
+      },
+      {
+        "file": "exception_keywords_master.xlsx",
+        "type": "master",
+        "version": "2026-11-23"
+      },
+      {
+        "file": "facility_master.xlsx",
+        "type": "master",
+        "version": "2026-11-23"
+      },
+      {
+        "file": "payor_mapping.xlsx",
+        "type": "master",
+        "version": "2026-11-23"
+      },
+      {
+        "file": "restricted_facility_master.xlsx",
+        "type": "master",
+        "version": "2026-11-23"
       }
-    ]
+    ],
+    "revision": "r2 2026-11-23: masters added; Payer Portal BRD not available"
   },
   "source_authority": [
     {
@@ -21,11 +47,16 @@
     },
     {
       "order": 2,
+      "source": "Master files 2026-11-23",
+      "rule": "Define data structure and values; BRD defines the rules. Where a master has no column for a BRD rule, the rule is blocked, not dropped."
+    },
+    {
+      "order": 3,
       "source": "BRD document history",
       "rule": "Used only when the body does not cover the change"
     },
     {
-      "order": 3,
+      "order": 4,
       "source": "Approved To-Be flow diagram",
       "rule": "Would win over BRD prose by default, but not supplied (MIS-001)"
     }
@@ -205,7 +236,7 @@
       "id": "REQ-007",
       "category": "Medicare Bypass",
       "title": "Medicare in-area patient on Approval Required list",
-      "description": "If Zip and Primary Insurance are available on the portal screen, the insurance is Medicare, the zip is in the Service Area (zip-only match) and the patient is on the Approval Required List: set Intake Review Flag1 = TRUE and generate an Intake Review Ask. If the Ask decision is Accept: accept the referral (Response 'Yes, Willing to accept patient', Comment 'Hello, we are happy to accept! If we see any issues, we will reach out! Can you confirm we are agency of choice?'), create the chart, generate a Mandatory EMR Ask if mandatory info is missing, and send the chart creation alert. If Decline: decline the referral.",
+      "description": "If Zip and Primary Insurance are available on the portal screen, the insurance is Medicare, the zip is in the Service Area (zip-only match) and the patient is on the Approval Required List: set Intake Review Flag1 = TRUE and generate an Intake Review Ask. If the Ask decision is Accept: accept the referral (Response 'Yes, Willing to accept patient', Comment 'Hello, we are happy to accept! If we see any issues, we will reach out! Can you confirm we are agency of choice?'), create the chart, generate a Mandatory EMR Ask if mandatory info is missing, and send the chart creation alert. If Decline: decline the referral. [r2] Approval Required List master supplied.",
       "type": "rule",
       "priority": "High",
       "source": "stated",
@@ -228,7 +259,6 @@
       "depends_on": [],
       "conflict_refs": [],
       "assumption_refs": [
-        "ASM-001",
         "ASM-003"
       ]
     },
@@ -256,7 +286,8 @@
       "technology_hints": [],
       "depends_on": [],
       "conflict_refs": [
-        "CON-012"
+        "CON-012",
+        "CON-016"
       ],
       "assumption_refs": [
         "ASM-003",
@@ -282,10 +313,12 @@
       },
       "authority": "BRD prose",
       "scope_status": "in_scope",
-      "status": "Extracted",
+      "status": "Resolved-conflict",
       "technology_hints": [],
       "depends_on": [],
-      "conflict_refs": [],
+      "conflict_refs": [
+        "CON-016"
+      ],
       "assumption_refs": []
     },
     {
@@ -365,7 +398,7 @@
       "id": "REQ-013",
       "category": "Patient Eligibility",
       "title": "Approval Required list check (flag 2)",
-      "description": "Check whether the patient is on the Approval Required List. If yes set Intake Review Flag2 = TRUE. In both cases continue to step 5.4 (Kantime report lookup by Patient name and DOB).",
+      "description": "Check whether the patient is on the Approval Required List. If yes set Intake Review Flag2 = TRUE. In both cases continue to step 5.4 (Kantime report lookup by Patient name and DOB). [r2] Source = Approval Required List master (First Name, Last Name, Date of Birth, EMR MRN, Patient ID, Status); match on name + DOB where Status = ACTIVE.",
       "type": "rule",
       "priority": "High",
       "source": "stated",
@@ -380,13 +413,11 @@
       },
       "authority": "BRD prose",
       "scope_status": "in_scope",
-      "status": "Blocked-missing-input",
+      "status": "Extracted",
       "technology_hints": [],
       "depends_on": [],
       "conflict_refs": [],
-      "assumption_refs": [
-        "ASM-001"
-      ]
+      "assumption_refs": []
     },
     {
       "id": "REQ-014",
@@ -1198,7 +1229,7 @@
       "id": "REQ-046",
       "category": "Exception Keywords",
       "title": "Read exception keyword list daily",
-      "description": "Read the exception keyword list daily from column L of the Service Area sheet; list is user-maintained and may grow.",
+      "description": "Read the exception keyword list from the Exception Keywords Master (65 keywords, Action = ASK for all, scoped by Line of Business) at least daily; the list is user-maintained and may grow. [r2] Replaces 'column L of Service Area sheet'.",
       "type": "integration",
       "priority": "High",
       "source": "stated",
@@ -1214,7 +1245,9 @@
       "status": "Extracted",
       "technology_hints": [],
       "depends_on": [],
-      "conflict_refs": [],
+      "conflict_refs": [
+        "CON-014"
+      ],
       "assumption_refs": [
         "ASM-008"
       ]
@@ -1223,7 +1256,7 @@
       "id": "REQ-047",
       "category": "Exception Keywords",
       "title": "Keyword search in comments and PDFs",
-      "description": "Search Careport Referral Comments and referral PDFs of type H&P (mainly), CRF, F2F, Continuation of Care, DC Order, AVS and Referral for any exception list item (e.g. 'Infusion'). If found set Intake Review Flag6 = TRUE. Continue to 5.16 in either case.",
+      "description": "Search Careport Referral Comments and referral PDFs of type H&P (mainly), CRF, F2F, Continuation of Care, DC Order, AVS and Referral for any exception list item (e.g. 'Infusion'). If found set Intake Review Flag6 = TRUE. Continue to 5.16 in either case. [r2] Keywords include short tokens (ALS, AMA, MS, MAG, C9, IVF, PEG, DNR) and overlapping ones (STAGE I / STAGE II), so matching must be whole-word.",
       "type": "rule",
       "priority": "High",
       "source": "stated",
@@ -1242,7 +1275,9 @@
       "technology_hints": [],
       "depends_on": [],
       "conflict_refs": [],
-      "assumption_refs": []
+      "assumption_refs": [
+        "ASM-008"
+      ]
     },
     {
       "id": "REQ-048",
@@ -1263,10 +1298,12 @@
       },
       "authority": "BRD prose",
       "scope_status": "in_scope",
-      "status": "Extracted",
+      "status": "Resolved-conflict",
       "technology_hints": [],
       "depends_on": [],
-      "conflict_refs": [],
+      "conflict_refs": [
+        "CON-016"
+      ],
       "assumption_refs": []
     },
     {
@@ -1334,10 +1371,12 @@
       },
       "authority": "BRD prose",
       "scope_status": "in_scope",
-      "status": "Extracted",
+      "status": "Resolved-conflict",
       "technology_hints": [],
       "depends_on": [],
-      "conflict_refs": [],
+      "conflict_refs": [
+        "CON-016"
+      ],
       "assumption_refs": []
     },
     {
@@ -1388,10 +1427,12 @@
       },
       "authority": "BRD prose",
       "scope_status": "in_scope",
-      "status": "Extracted",
+      "status": "Resolved-conflict",
       "technology_hints": [],
       "depends_on": [],
-      "conflict_refs": [],
+      "conflict_refs": [
+        "CON-016"
+      ],
       "assumption_refs": []
     },
     {
@@ -1434,10 +1475,12 @@
       },
       "authority": "BRD prose",
       "scope_status": "in_scope",
-      "status": "Extracted",
+      "status": "Resolved-conflict",
       "technology_hints": [],
       "depends_on": [],
-      "conflict_refs": [],
+      "conflict_refs": [
+        "CON-016"
+      ],
       "assumption_refs": []
     },
     {
@@ -1544,7 +1587,7 @@
       "id": "REQ-060",
       "category": "Referral Source Exception",
       "title": "Restricted facility colour match decline",
-      "description": "If the referral facility is in the Restricted Facility sheet and the plan's Payer contract colour equals a colour listed for that facility (Red only, Yellow only, or both): decline with Response 'Decline', Reason 'Payer Referrals/ Requests at Capacity', Comment 'Thank you for thinking of us, however we are at our census maximum for this payor.', send 'Referral source exception' decline alert, create Non-Admit chart with reason 'Referral Source Management'. Otherwise continue to payer eligibility.",
+      "description": "If the referral facility is in the Restricted Facility sheet and the plan's Payer contract colour equals a colour listed for that facility (Red only, Yellow only, or both): decline with Response 'Decline', Reason 'Payer Referrals/ Requests at Capacity', Comment 'Thank you for thinking of us, however we are at our census maximum for this payor.', send 'Referral source exception' decline alert, create Non-Admit chart with reason 'Referral Source Management'. Otherwise continue to payer eligibility. [r2] Restricted Facility master columns: Facility Name, Careport Location, Payer Contract Color ('RED, YELLOW' or 'RED'), Active.",
       "type": "rule",
       "priority": "High",
       "source": "stated",
@@ -1566,7 +1609,8 @@
       ],
       "conflict_refs": [
         "CON-002",
-        "CON-003"
+        "CON-003",
+        "CON-015"
       ],
       "assumption_refs": []
     },
@@ -1597,7 +1641,7 @@
       "id": "REQ-062",
       "category": "Referral Source Exception",
       "title": "ProMedica location matching",
-      "description": "If Careport sending organization contains 'ProMedica', match the referral Location against column D (format 'Location: PTH', e.g. PTH_F, PTH_F_REHI, PTH, PTH_WWREHI, PTH_WWNS); on match select the corresponding Marketer Email ID and Kantime Facility (column E).",
+      "description": "If Careport sending organization contains 'ProMedica', match the referral Location against column D (format 'Location: PTH', e.g. PTH_F, PTH_F_REHI, PTH, PTH_WWREHI, PTH_WWNS); on match select the corresponding Marketer Email ID and Kantime Facility (column E). [r2] Master has no ProMedica location rows (PTH, PTH_F...); only 'PROMEDICA TOLEDO HOSPITAL' with blank location.",
       "type": "rule",
       "priority": "High",
       "source": "stated",
@@ -1610,17 +1654,19 @@
       },
       "authority": "BRD prose",
       "scope_status": "in_scope",
-      "status": "Extracted",
+      "status": "Blocked-missing-input",
       "technology_hints": [],
       "depends_on": [],
-      "conflict_refs": [],
+      "conflict_refs": [
+        "CON-015"
+      ],
       "assumption_refs": []
     },
     {
       "id": "REQ-063",
       "category": "Referral Source Exception",
       "title": "Bon Secours Mercy Health location matching",
-      "description": "If sending organization is BonSecoursMercyHealthInc: match referral Location to column D (format 'Location: STVZVPB', partial matches allowed - extra letters/numerics handled); if no location match, match the Facility field to column D. On match select Marketer Email ID and Kantime Facility. Rows with column A 'Bon Secours Mercy Health, Inc.' and a Careport Location in column B are restricted facilities.",
+      "description": "If sending organization is BonSecoursMercyHealthInc: match referral Location to column D (format 'Location: STVZVPB', partial matches allowed - extra letters/numerics handled); if no location match, match the Facility field to column D. On match select Marketer Email ID and Kantime Facility. Rows with column A 'Bon Secours Mercy Health, Inc.' and a Careport Location in column B are restricted facilities. [r2] Master has no Bon Secours Mercy Health location rows.",
       "type": "rule",
       "priority": "High",
       "source": "stated",
@@ -1633,10 +1679,12 @@
       },
       "authority": "BRD prose",
       "scope_status": "in_scope",
-      "status": "Extracted",
+      "status": "Blocked-missing-input",
       "technology_hints": [],
       "depends_on": [],
-      "conflict_refs": [],
+      "conflict_refs": [
+        "CON-015"
+      ],
       "assumption_refs": [
         "ASM-009"
       ]
@@ -1701,7 +1749,7 @@
       "id": "REQ-066",
       "category": "Payer Eligibility",
       "title": "Primary payer eligibility per Payer Portal BRD",
-      "description": "If the patient is found, perform primary payer eligibility check on the portal as specified in the separate Payer Portal BRD.",
+      "description": "If the patient is found, perform primary payer eligibility check on the portal as specified in the separate Payer Portal BRD. [r2] Deferred: Payer Portal BRD not available (user, 2026-11-23).",
       "type": "integration",
       "priority": "High",
       "source": "stated",
@@ -1713,7 +1761,7 @@
         "ids": []
       },
       "authority": "BRD prose",
-      "scope_status": "in_scope",
+      "scope_status": "deferred",
       "status": "Blocked-missing-input",
       "technology_hints": [],
       "depends_on": [],
@@ -1984,10 +2032,12 @@
       },
       "authority": "BRD prose",
       "scope_status": "in_scope",
-      "status": "Extracted",
+      "status": "Resolved-conflict",
       "technology_hints": [],
       "depends_on": [],
-      "conflict_refs": [],
+      "conflict_refs": [
+        "CON-016"
+      ],
       "assumption_refs": []
     },
     {
@@ -2076,10 +2126,12 @@
       },
       "authority": "BRD prose",
       "scope_status": "in_scope",
-      "status": "Extracted",
+      "status": "Blocked-missing-input",
       "technology_hints": [],
       "depends_on": [],
-      "conflict_refs": [],
+      "conflict_refs": [
+        "CON-017"
+      ],
       "assumption_refs": []
     },
     {
@@ -2177,14 +2229,16 @@
       "status": "Blocked-missing-input",
       "technology_hints": [],
       "depends_on": [],
-      "conflict_refs": [],
+      "conflict_refs": [
+        "CON-016"
+      ],
       "assumption_refs": []
     },
     {
       "id": "REQ-086",
       "category": "EMR - Kantime",
       "title": "Commercial notes: coverage, deductible, OOP",
-      "description": "For Commercial AA, write notes with Coverage {Project %}, Deductible and Out of Pocket (max/remaining) and Visit Limit (Availity only) from Availity, Ability, UHC, UMR or Cigna; for UMR remaining = max minus total met. Medicaid/Medicare AA notes use the template unchanged.",
+      "description": "For Commercial AA, write notes with Coverage {Project %}, Deductible and Out of Pocket (max/remaining) and Visit Limit (Availity only) from Availity, Ability, UHC, UMR or Cigna; for UMR remaining = max minus total met. Medicaid/Medicare AA notes use the template unchanged. [r2] Deferred: Payer Portal BRD not available (user, 2026-11-23).",
       "type": "data-mapping",
       "priority": "High",
       "source": "stated",
@@ -2196,8 +2250,8 @@
         "ids": []
       },
       "authority": "BRD prose",
-      "scope_status": "in_scope",
-      "status": "Resolved-conflict",
+      "scope_status": "deferred",
+      "status": "Blocked-missing-input",
       "technology_hints": [],
       "depends_on": [],
       "conflict_refs": [
@@ -2245,10 +2299,12 @@
       },
       "authority": "BRD prose",
       "scope_status": "in_scope",
-      "status": "Extracted",
+      "status": "Blocked-missing-input",
       "technology_hints": [],
       "depends_on": [],
-      "conflict_refs": [],
+      "conflict_refs": [
+        "CON-017"
+      ],
       "assumption_refs": []
     },
     {
@@ -2268,10 +2324,12 @@
       },
       "authority": "BRD prose",
       "scope_status": "in_scope",
-      "status": "Extracted",
+      "status": "Blocked-missing-input",
       "technology_hints": [],
       "depends_on": [],
-      "conflict_refs": [],
+      "conflict_refs": [
+        "CON-017"
+      ],
       "assumption_refs": []
     },
     {
@@ -2291,10 +2349,12 @@
       },
       "authority": "BRD prose",
       "scope_status": "in_scope",
-      "status": "Extracted",
+      "status": "Blocked-missing-input",
       "technology_hints": [],
       "depends_on": [],
-      "conflict_refs": [],
+      "conflict_refs": [
+        "CON-017"
+      ],
       "assumption_refs": []
     },
     {
@@ -2341,10 +2401,12 @@
       },
       "authority": "BRD prose",
       "scope_status": "in_scope",
-      "status": "Extracted",
+      "status": "Resolved-conflict",
       "technology_hints": [],
       "depends_on": [],
-      "conflict_refs": [],
+      "conflict_refs": [
+        "CON-016"
+      ],
       "assumption_refs": []
     },
     {
@@ -2370,7 +2432,8 @@
       "technology_hints": [],
       "depends_on": [],
       "conflict_refs": [
-        "CON-009"
+        "CON-009",
+        "CON-016"
       ],
       "assumption_refs": []
     },
@@ -2391,10 +2454,12 @@
       },
       "authority": "BRD prose",
       "scope_status": "in_scope",
-      "status": "Extracted",
+      "status": "Resolved-conflict",
       "technology_hints": [],
       "depends_on": [],
-      "conflict_refs": [],
+      "conflict_refs": [
+        "CON-016"
+      ],
       "assumption_refs": []
     },
     {
@@ -2437,10 +2502,12 @@
       },
       "authority": "BRD prose",
       "scope_status": "in_scope",
-      "status": "Extracted",
+      "status": "Resolved-conflict",
       "technology_hints": [],
       "depends_on": [],
-      "conflict_refs": [],
+      "conflict_refs": [
+        "CON-016"
+      ],
       "assumption_refs": []
     },
     {
@@ -2680,6 +2747,152 @@
       "depends_on": [],
       "conflict_refs": [],
       "assumption_refs": []
+    },
+    {
+      "id": "REQ-107",
+      "category": "Master Data",
+      "title": "Normalise master text before matching",
+      "description": "Before matching, trim, uppercase and replace non-breaking spaces (found in Restricted Facility names, e.g. 'MEDINA\\u00a0HOSPITAL') with normal spaces in all master and referral values.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "Masters 2026-11-23",
+        "section": "restricted_facility_master.xlsx col A",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "master files",
+      "scope_status": "in_scope",
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-015"
+      ],
+      "assumption_refs": [],
+      "status": "Extracted",
+      "technology_hints": []
+    },
+    {
+      "id": "REQ-108",
+      "category": "Master Data",
+      "title": "Use only Active master rows",
+      "description": "Ignore rows where Active / Facility Active = false in the Restricted Facility and Facility masters.",
+      "type": "rule",
+      "priority": "Medium",
+      "source": "stated",
+      "source_ref": {
+        "doc": "Masters 2026-11-23",
+        "section": "restricted_facility_master col D; facility_master col P",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "master files",
+      "scope_status": "in_scope",
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": [],
+      "status": "Extracted",
+      "technology_hints": []
+    },
+    {
+      "id": "REQ-109",
+      "category": "Master Data",
+      "title": "Treat payor portal 'NULL' as not identified",
+      "description": "Payor Mapping rows with Payor Portal 'NULL' (19 rows) or blank are treated as payer portal not identified (section 5.30 path).",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "Masters 2026-11-23",
+        "section": "payor_mapping.xlsx col C",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "master files",
+      "scope_status": "in_scope",
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-016"
+      ],
+      "assumption_refs": [],
+      "status": "Extracted",
+      "technology_hints": []
+    },
+    {
+      "id": "REQ-110",
+      "category": "Master Data",
+      "title": "Handle multi-portal values",
+      "description": "Payor Portal may list two portals ('ABILITY, AVAILITY' 559 rows; 'AVAILITY, ABILITY' 43 rows). The bot tries them in the order listed until the patient is found.",
+      "type": "rule",
+      "priority": "High",
+      "source": "stated",
+      "source_ref": {
+        "doc": "Masters 2026-11-23",
+        "section": "payor_mapping.xlsx col C",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "master files",
+      "scope_status": "in_scope",
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": [
+        "ASM-018"
+      ],
+      "status": "Extracted",
+      "technology_hints": []
+    },
+    {
+      "id": "REQ-111",
+      "category": "Master Data",
+      "title": "Keyword scope by Line of Business",
+      "description": "Apply an exception keyword only when its Line of Business matches the referral (Home Health for this process).",
+      "type": "rule",
+      "priority": "Medium",
+      "source": "stated",
+      "source_ref": {
+        "doc": "Masters 2026-11-23",
+        "section": "exception_keywords_master.xlsx col C",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "master files",
+      "scope_status": "in_scope",
+      "depends_on": [],
+      "conflict_refs": [
+        "CON-014"
+      ],
+      "assumption_refs": [],
+      "status": "Extracted",
+      "technology_hints": []
+    },
+    {
+      "id": "REQ-112",
+      "category": "Master Data",
+      "title": "Startup master data checks",
+      "description": "At start and on each reload, check masters for: blank required columns, duplicate rows, future DOBs, unparseable values; log and alert the Intake team instead of failing silently.",
+      "type": "error-handling",
+      "priority": "Medium",
+      "source": "stated",
+      "source_ref": {
+        "doc": "Masters 2026-11-23",
+        "section": "all masters (r2 profiling)",
+        "page": null,
+        "slide": null,
+        "ids": []
+      },
+      "authority": "master files",
+      "scope_status": "in_scope",
+      "depends_on": [],
+      "conflict_refs": [],
+      "assumption_refs": [],
+      "status": "Extracted",
+      "technology_hints": []
     }
   ],
   "conflicts": [
@@ -2937,20 +3150,118 @@
         "REQ-040",
         "REQ-082"
       ]
+    },
+    {
+      "id": "CON-014",
+      "topic": "Exception keyword source",
+      "sources": [
+        {
+          "doc": "BRD v1.25 5.15",
+          "says": "column L of Service Area sheet"
+        },
+        {
+          "doc": "Masters 2026-11-23",
+          "says": "separate Exception Keywords Master with Action and Line of Business"
+        }
+      ],
+      "resolution": "Use the Exception Keywords Master. Its Line of Business column holds exported code text, not a value; treat all 65 as Home Health until a clean export is supplied.",
+      "basis": "newer source",
+      "risk": "Medium",
+      "affects": [
+        "REQ-046",
+        "REQ-111"
+      ]
+    },
+    {
+      "id": "CON-015",
+      "topic": "Restricted Facility master differs from BRD format",
+      "sources": [
+        {
+          "doc": "BRD v1.25 5.21",
+          "says": "two rows per facility (referral-portal name + Kantime name), ProMedica/Mercy location codes"
+        },
+        {
+          "doc": "Masters 2026-11-23",
+          "says": "one row per facility, Careport Location filled for 1 of 35 rows, no Kantime name, no ProMedica/Mercy location codes; 26 of 31 names not in Facility master; 'SINAI-GRACE HOSPITA' is truncated"
+        }
+      ],
+      "resolution": "Match Careport facility name to the master after normalisation; location-based ProMedica/Mercy rules blocked until location rows are added.",
+      "basis": "master is the data source",
+      "risk": "High",
+      "affects": [
+        "REQ-060",
+        "REQ-062",
+        "REQ-063",
+        "REQ-107"
+      ]
+    },
+    {
+      "id": "CON-016",
+      "topic": "Payor Mapping key columns empty",
+      "sources": [
+        {
+          "doc": "BRD v1.25 5.16-5.30",
+          "says": "uses Associated Agency, Medicare, Commercial, Identifier, Payer contract colour, Kantime payer, Paediatric (Purple)"
+        },
+        {
+          "doc": "Masters 2026-11-23",
+          "says": "Agency, Medicare, Commercial, EMR Source, Identifier, Contract are empty in all 1,156 rows; EMR Payor Name filled in 2; no paediatric column; 291 exact duplicate rows"
+        }
+      ],
+      "resolution": "Rules stay as in the BRD. The master export must be re-supplied with these columns filled; until then these rules cannot be tested.",
+      "basis": "BRD defines rules",
+      "risk": "High",
+      "affects": [
+        "REQ-008",
+        "REQ-009",
+        "REQ-048",
+        "REQ-051",
+        "REQ-053",
+        "REQ-055",
+        "REQ-077",
+        "REQ-085",
+        "REQ-092",
+        "REQ-093",
+        "REQ-094",
+        "REQ-096",
+        "REQ-109"
+      ]
+    },
+    {
+      "id": "CON-017",
+      "topic": "Facility master routing columns empty",
+      "sources": [
+        {
+          "doc": "BRD v1.25 5.24, 5.26-5.28",
+          "says": "Kantime facility, CC1, marketer, Admission DL, Admission Source per facility"
+        },
+        {
+          "doc": "Masters 2026-11-23",
+          "says": "CC1, Sales Person, Admission DL, Marketer Email, Admission Source, Agency Name empty in all 928 rows; no Kantime facility name column; dummy 'Ohioans HomeHealth Care' not present"
+        }
+      ],
+      "resolution": "Rules stay as in the BRD; blocked until the columns are filled. Use the dummy facility and Team 2 only per BRD exception rules.",
+      "basis": "BRD defines rules",
+      "risk": "High",
+      "affects": [
+        "REQ-081",
+        "REQ-088",
+        "REQ-089",
+        "REQ-090"
+      ]
     }
   ],
   "assumptions": [
     {
       "id": "ASM-001",
-      "statement": "The 'Approval Required List' is a client-maintained list (sheet or Kantime client alert) checked by patient name + DOB.",
+      "statement": "RESOLVED r2: Approval Required List is a master (First Name, Last Name, DOB, EMR MRN, Patient ID, Status). Match on normalised name + DOB, Status = ACTIVE.",
       "reason": "BRD uses it but never defines its source.",
-      "risk": "High",
-      "if_wrong": "Flag1/Flag2 logic and the Ask volume change.",
+      "risk": "Low",
+      "if_wrong": "n/a",
       "affects": [
-        "REQ-007",
         "REQ-013"
       ],
-      "needs_confirmation": true
+      "needs_confirmation": false
     },
     {
       "id": "ASM-002",
@@ -3011,9 +3322,9 @@
     },
     {
       "id": "ASM-008",
-      "statement": "The keyword list is read at least once a day and matching is case-insensitive whole-word.",
+      "statement": "Keyword matching is case-insensitive whole-word/phrase on normalised text (needed: ALS, MS, MAG, C9 would otherwise match inside other words; STAGE I would match STAGE II).",
       "reason": "Matching rule not stated.",
-      "risk": "Medium",
+      "risk": "High",
       "if_wrong": "False positives/negatives on Flag6.",
       "affects": [
         "REQ-046"
@@ -3112,12 +3423,23 @@
     },
     {
       "id": "ASM-017",
-      "statement": "'Paediatric Plan (Purple)' is a colour/flag column in the Insurance master.",
+      "statement": "'Paediatric Plan (Purple)' must come from a column not present in Payor Mapping (r2). Until supplied, paediatric plan rules cannot run.",
       "reason": "Master not supplied.",
-      "risk": "Medium",
+      "risk": "High",
       "if_wrong": "Plan check needs another source.",
       "affects": [
         "REQ-041"
+      ],
+      "needs_confirmation": true
+    },
+    {
+      "id": "ASM-018",
+      "statement": "When Payor Portal lists two portals, try them in the listed order.",
+      "reason": "Master has combined values; BRD says 'Availity or Ability'.",
+      "risk": "Medium",
+      "if_wrong": "Wrong portal tried first; slower.",
+      "affects": [
+        "REQ-110"
       ],
       "needs_confirmation": true
     }
@@ -3146,11 +3468,11 @@
         "REQ-055",
         "REQ-074"
       ],
-      "working_assumption": "Columns as described: A Zip, B County+State, G Location, H Limitation, L Exceptions, order columns with x/colours, Team."
+      "working_assumption": "Columns as described: A Zip, B County+State, G Location, H Limitation, L Exceptions, order columns with x/colours, Team. STILL MISSING at r2 (not among the uploaded masters)."
     },
     {
       "id": "MIS-003",
-      "name": "Insurance plan master",
+      "name": "Insurance plan master (Payor Mapping) - SUPPLIED r2 but key columns empty",
       "referenced_in": "BRD 5.16-5.19, 5.24, 5.25, 5.30",
       "blocks": [
         "REQ-048",
@@ -3159,11 +3481,11 @@
         "REQ-093",
         "REQ-085"
       ],
-      "working_assumption": "Columns: Plan description, Kantime payer, Identifiers (C), Payer portal, Payer contract colour, Associated agencies (F), Commercial, Medicare, Paediatric flag."
+      "working_assumption": "See CON-016: re-export with Agency, Medicare, Commercial, Identifier, Contract, EMR Payor Name and a paediatric flag."
     },
     {
       "id": "MIS-004",
-      "name": "Referral Source mapping sheet",
+      "name": "Referral Source mapping (Facility Master) - SUPPLIED r2 but routing columns empty",
       "referenced_in": "BRD 5.24, 5.26-5.28",
       "blocks": [
         "REQ-081",
@@ -3171,18 +3493,18 @@
         "REQ-089",
         "REQ-090"
       ],
-      "working_assumption": "Columns F facility, G Kantime facility, H/I sales person, K email, CC1, Admission DL, Admission Source."
+      "working_assumption": "See CON-017."
     },
     {
       "id": "MIS-005",
-      "name": "Restricted Facility / Referral Source Exception sheet",
+      "name": "Restricted Facility master - SUPPLIED r2, partial",
       "referenced_in": "BRD 5.21",
       "blocks": [
         "REQ-060",
         "REQ-062",
         "REQ-063"
       ],
-      "working_assumption": "Format as in 5.21 tables."
+      "working_assumption": "See CON-015: ProMedica/Mercy location rows missing."
     },
     {
       "id": "MIS-006",
@@ -3192,17 +3514,14 @@
         "REQ-066",
         "REQ-086"
       ],
-      "working_assumption": "Separate BRD covers per-portal eligibility steps."
+      "working_assumption": "Not available (user, 2026-11-23). Per-portal eligibility steps deferred; this build stops at portal outcome."
     },
     {
       "id": "MIS-007",
-      "name": "Approval Required List",
+      "name": "Approval Required List - SUPPLIED r2",
       "referenced_in": "BRD 5.1.7, 5.1.14",
-      "blocks": [
-        "REQ-007",
-        "REQ-013"
-      ],
-      "working_assumption": "ASM-001."
+      "blocks": [],
+      "working_assumption": "Resolved."
     },
     {
       "id": "MIS-008",
@@ -3245,18 +3564,22 @@
     "Speed critical: 1-hour SLA, first-come first-served portals"
   ],
   "open_questions": [
-    "Is 18 years old paediatric or adult? (CON-005)",
-    "Where does the Approval Required List come from? (MIS-007)",
-    "Confirm only Careport UI is in scope for this build. (CON-008)",
-    "Does the Medicare bypass need the Kantime existing-patient check before accepting? (CON-012)",
+    "Payor Mapping export: why are Agency, Medicare, Commercial, Identifier, Contract and EMR Payor Name empty? Re-export filled, plus a paediatric (Purple) flag. (CON-016)",
+    "Send the Service Area mapping sheet (zip, county, location, limitation, staffing, payer colours per order, team). Still missing. (MIS-002)",
+    "Facility Master: fill CC1, Sales Person, Admission DL, Marketer Email, Admission Source, Kantime facility name; add the dummy 'Ohioans HomeHealth Care'. (CON-017)",
+    "Restricted Facility master: add ProMedica (PTH...) and Mercy location rows; fix truncated 'SINAI-GRACE HOSPITA'. (CON-015)",
+    "Confirm whole-word keyword matching and that all 65 keywords apply to Home Health. (ASM-008, CON-014)",
+    "Is an 18-year-old paediatric or adult? (CON-005)",
+    "Confirm only Careport UI is in scope. (CON-008)",
+    "Does the Medicare bypass need the Kantime existing-patient check first? (CON-012)",
     "Provide the approved To-Be flow diagram. (MIS-001)",
-    "Provide the masters: Service Area, Insurance, Referral Source, Restricted Facility. (MIS-002..005)",
-    "Provide the Payer Portal BRD. (MIS-006)",
+    "Payer Portal BRD: when will it be available? Eligibility steps deferred until then. (MIS-006)",
+    "Approval Required List: 3 rows have future DOBs; confirm they should be corrected.",
     "Confirm the exact Careport decline Response/Reason values. (CON-003)",
     "Define 'inactive' vs 'not eligible'. (ASM-011)"
   ],
   "counts": {
-    "requirements": 106,
+    "requirements": 112,
     "by_category": {
       "Referral Intake": 7,
       "Referral Portal Response": 1,
@@ -3282,28 +3605,30 @@
       "Manual Decline": 1,
       "CareFlo App": 1,
       "Logging": 1,
-      "Non-Functional": 3
+      "Non-Functional": 3,
+      "Master Data": 6
     },
     "by_source": {
-      "stated": 105,
+      "stated": 111,
       "assumed": 1
     },
     "by_scope_status": {
-      "in_scope": 104,
+      "in_scope": 108,
+      "deferred": 2,
       "excluded": 2
     },
     "by_status": {
-      "Extracted": 79,
-      "Resolved-conflict": 22,
-      "Blocked-missing-input": 4,
-      "Assumed": 1
+      "Extracted": 71,
+      "Resolved-conflict": 30,
+      "Assumed": 1,
+      "Blocked-missing-input": 10
     },
-    "conflicts": 12,
-    "assumptions": 16,
+    "conflicts": 16,
+    "assumptions": 17,
     "assumptions_by_risk": {
-      "High": 4,
-      "Medium": 10,
-      "Low": 2
+      "Low": 3,
+      "High": 5,
+      "Medium": 9
     },
     "missing_inputs": 10,
     "divergences": 0,

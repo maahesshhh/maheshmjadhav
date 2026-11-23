@@ -1,6 +1,8 @@
 # Gap register: Ohioans HHC Referral Bot (Careport), BRD v1.25
 
-Input: `02-requirements.json` (106 requirements, 12 conflicts, 16 assumptions, 10 missing inputs).
+Input: `02-requirements.json`, revision r2 (112 requirements, 16 conflicts, 17 assumptions, 10 missing inputs), plus 5 master files dated 2026-11-23.
+
+**r2 changes (2026-11-23):** the masters resolved GAP-01, and partly resolved GAP-03 and GAP-17. GAP-04 is deferred because the Payer Portal BRD is not available. Profiling the masters added GAP-39 to GAP-47.
 **BRD-GAP** = the BRD is silent or ambiguous. **AI-RECOMMENDATION** = a suggestion from this review, not a requirement.
 Every "Suggested default" is a suggestion only, and needs the business or engineering owner to confirm it.
 
@@ -24,10 +26,10 @@ Every "Suggested default" is a suggestion only, and needs the business or engine
 
 | ID | Class | Tag | Severity | Req | Finding | Question | Suggested default |
 |---|---|---|---|---|---|---|---|
-| GAP-01 | Critical blocker | BRD-GAP | Critical | REQ-007, 013 | The "Approval Required List" sets Intake Review Flags 1 and 2, but the BRD never says what it is or where it lives. | What is the Approval Required List, where is it kept, who maintains it, and what is the match key? | A tab in the Insurance and Service Areas Google sheet, matched on normalised name + DOB. |
+| GAP-01 | ~~Critical blocker~~ **Resolved r2** | BRD-GAP | — | REQ-007, 013 | The "Approval Required List" sets Intake Review Flags 1 and 2, but the BRD never says what it is or where it lives. | What is the Approval Required List, where is it kept, who maintains it, and what is the match key? | A tab in the Insurance and Service Areas Google sheet, matched on normalised name + DOB. |
 | GAP-02 | Critical blocker | BRD-GAP | Critical | REQ-008, 023 | The Medicare bypass accepts the referral and creates a chart **without** the Kantime report lookup. An Active, PSOC or Transfer patient would get the "new patient" comment and possibly a duplicate chart. | Must the bypass first check the two cached Kantime reports? That check is a local file lookup and takes seconds. | Yes. Run the report lookup before the bypass; it does not slow the response. |
-| GAP-03 | Critical blocker | BRD-GAP | Critical | REQ-037, 048-063, 074-090 | Masters not supplied: Service Area, Insurance plan master, Referral Source, Restricted Facility. Column letters are inferred from the prose. | Send current copies, and say who owns each, where it is kept (Google Sheets or the CareFlo master) and how it is versioned. | None. Build is blocked. |
-| GAP-04 | Critical blocker | BRD-GAP | Critical | REQ-066, 085, 086 | The eligibility steps for the 8 payer portals are in a separate "Payer Portal BRD" that was not supplied. | Send the Payer Portal BRD. Is it in scope for this build? | Treat it as a separate work package. This build stops at the portal outcome (eligible, inactive, not found). |
+| GAP-03 | Critical blocker (partly resolved r2: 4 of 5 masters received; the Service Area sheet is still missing; see GAP-39 to GAP-42) | BRD-GAP | Critical | REQ-037, 048-063, 074-090 | Masters not supplied: Service Area, Insurance plan master, Referral Source, Restricted Facility. Column letters are inferred from the prose. | Send current copies, and say who owns each, where it is kept (Google Sheets or the CareFlo master) and how it is versioned. | None. Build is blocked. |
+| GAP-04 | **Deferred r2** (Payer Portal BRD not available) | BRD-GAP | High | REQ-066, 085, 086 | The eligibility steps for the 8 payer portals are in a separate "Payer Portal BRD" that was not supplied. | Send the Payer Portal BRD. Is it in scope for this build? | Treat it as a separate work package. This build stops at the portal outcome (eligible, inactive, not found). |
 | GAP-05 | Critical blocker | BRD-GAP | High | All | v1.24 says the requirements follow "the approved flow diagram from Jaimie", but section 4 only contains the text "New flow diagram". | Send the approved To-Be diagram. Does it override BRD prose where they differ? | BRD prose is the working authority until the diagram is received. |
 | GAP-06 | Business clarification | BRD-GAP | High | REQ-041-045, 075 | Section 5.13 says paediatric is 0-18 and 5.24 says "<18". A patient aged exactly 18 is undefined. | Is an 18-year-old paediatric or adult? | Under 18 is paediatric; 18 and over is adult. |
 | GAP-07 | Business clarification | BRD-GAP | High | REQ-003, 105 | 14+ referral portals are named, but screen steps exist only for Careport. | Is this build Careport-only? | Careport only; the other portals become later phases. |
@@ -40,7 +42,7 @@ Every "Suggested default" is a suggestion only, and needs the business or engine
 | GAP-14 | Business clarification | BRD-GAP | Medium | REQ-068, 069 | "Inactive" vs "not eligible" is undefined. Future-effective coverage and coverage ending soon are not covered. | Define both. How should future-effective coverage and coverage ending within 30 days be handled? | Inactive or future-effective sets Flag8 for review; active but plan not accepted is a decline. |
 | GAP-15 | Business clarification | BRD-GAP | Medium | REQ-080 | Only a Medicare secondary payer "in Availity" is handled. Non-Medicare secondaries and tertiary payers are not covered. | Should non-Medicare secondaries be added in Kantime? | Add the secondary only when it is Medicare; record others in CareFlo notes. |
 | GAP-16 | Business clarification | BRD-GAP | Medium | REQ-093, 094 | "Two or more identifier matches: pick the first row." The result depends on the sheet's sort order, so re-sorting changes the result. | Is row order a deliberate priority? | Add an explicit Priority column to the Insurance master. |
-| GAP-17 | Business clarification | BRD-GAP | Medium | REQ-047 | Exception keyword matching is not specified: case, partial words, negation ("no infusion needed"). | Should matching be whole-word? Must negation be handled? | Case-insensitive whole-word match. Negation is a known limitation and still raises a flag. |
+| GAP-17 | Business clarification (now High, see GAP-43) | BRD-GAP | High | REQ-047 | Exception keyword matching is not specified: case, partial words, negation ("no infusion needed"). | Should matching be whole-word? Must negation be handled? | Case-insensitive whole-word match. Negation is a known limitation and still raises a flag. |
 | GAP-18 | Business clarification | BRD-GAP | Medium | REQ-041, 044, 060 | Decline Response values differ between sections ("Decline" vs "No, unable to accept patient"). | Send the actual Careport Response and Response Reason dropdown values. | Use each section as written and confirm in Careport production. |
 | GAP-19 | Business clarification | BRD-GAP | Medium | REQ-063 | The Mercy "partial match (extra letters/numerics handled)" rule is undefined. | Give 3-5 real examples of locations that should match and should not. | Normalised "contains" match after removing spaces and punctuation. |
 | GAP-20 | Business clarification | BRD-GAP | Medium | REQ-024-028 | Existing patients (Active, Transfer, PSOC) skip the service area and payer checks. A patient who moved or changed payer is only reported in the mismatch email. | Confirm that is intended. | As written. |
@@ -62,24 +64,36 @@ Every "Suggested default" is a suggestion only, and needs the business or engine
 | GAP-36 | Known limitation | AI-RECOMMENDATION | Low | All UI steps | Careport and Kantime UI changes will break selectors. | None needed. | Central selector repository plus a daily login and smoke-test health check. |
 | GAP-37 | Recommended enhancement | AI-RECOMMENDATION | Medium | REQ-007-063 | 25 versions in about 2 years, mostly rule changes. Hard-coded rules will be expensive to maintain. | None needed. | Keep the decision rules in a rule engine or config table, separate from the UI bots. |
 | GAP-38 | Recommended enhancement | AI-RECOMMENDATION | Low | REQ-101 | Nothing checks that Careport decisions and Kantime charts stay in step. | None needed. | Daily reconciliation report from CareFlo. |
+| GAP-39 | Critical blocker | BRD-GAP | Critical | REQ-008, 048-055, 077, 085, 092-096, 109 | **Payor Mapping key columns are empty.** In all 1,156 rows, Agency, Medicare, Commercial, EMR Source, Identifier and Contract are empty; EMR Payor Name is filled in only 2 rows. Without them, the Medicare bypass, Dummy-payor, UHC/Humana, agency-appropriate, census-colour, identifier and Kantime-payer rules can't run. | Is this export incomplete, or are these values kept somewhere else (for example in the old Google sheet)? Please re-export with the columns filled. | Blocks build and testing of the decision rules. |
+| GAP-40 | Critical blocker | BRD-GAP | Critical | REQ-041-044 | **No Paediatric (Purple) plan flag** exists in Payor Mapping. | Which column or source marks a paediatric plan? | Add a Paediatric Y/N column to Payor Mapping. |
+| GAP-41 | Critical blocker | BRD-GAP | High | REQ-081, 088-090 | **Facility Master routing columns are empty.** In all 928 rows, CC1, Sales Person, Admission DL, Marketer Email, Admission Source, Referring Physician and Agency Name are empty. There is no Kantime facility name column, and the dummy "Ohioans HomeHealth Care" is missing. | Please re-export with the routing columns filled and add the dummy facility. | Until then, team, marketer and email routing would all fall back to Team 2. |
+| GAP-42 | Critical blocker | BRD-GAP | Critical | REQ-037, 052-056, 074, 078 | **The Service Area mapping sheet was not supplied.** It holds zip, county, location, limitation, staffing per order, payer colour per order and team. | Please send it. | Service area, No UHC, census, staffing, location and team rules are blocked. |
+| GAP-43 | Business clarification | BRD-GAP | High | REQ-047 | The Exception Keywords Master has short tokens (ALS, AMA, MS, MAG, C9, IVF, PEG, DNR) and overlapping ones (STAGE I / II / III / IV). A substring match would flag "Ms. Smith", "alsо" and "magnetic", and "STAGE I" would match every stage. | Confirm whole-word matching. Should "MS" be removed or changed to "MULTIPLE SCLEROSIS"? | Whole-word match on normalised text, and rename the short tokens to full terms. |
+| GAP-44 | Technical clarification | BRD-GAP | Medium | REQ-046, 111 | The Exception Keywords Master "Line of Business" column contains exported code (`const names = { 1: 'Hospice', 2: 'Home Health' } …`) instead of a value. | Please re-export with the actual LOB values. | Treat all 65 keywords as Home Health for now. |
+| GAP-45 | Business clarification | BRD-GAP | High | REQ-060, 062, 063, 107 | The Restricted Facility master doesn't match the BRD's format: there is no Kantime name; Careport Location is filled for 1 of 35 rows; the ProMedica and Mercy location codes are missing; 26 of 31 names aren't in the Facility Master; names contain non-breaking spaces; "TENET - DMC SINAI-GRACE HOSPITA" is a truncated duplicate. | How should a Careport facility be matched to a restricted facility: exact name, contains, or a mapping? Please add the ProMedica and Mercy location rows. | Normalised exact-name match, with location codes added for ProMedica and Mercy. |
+| GAP-46 | Business clarification | BRD-GAP | Medium | REQ-013 | Approval Required List: 3 rows have a future DOB (probably two-digit-year errors), 58 names contain spaces or punctuation, EMR MRN is empty in every row, and 1 name appears with two DOBs. | Please correct the future DOBs. Can MRN be filled to give a stronger match key? | Match on normalised name + DOB; report bad rows at load time (REQ-112). |
+| GAP-47 | Technical clarification | AI-RECOMMENDATION | Medium | REQ-077, 093, 108-110 | Payor Mapping has 291 exact duplicate rows, 215 plan descriptions used in more than one row, 19 rows with Payor Portal "NULL", and combined values such as "ABILITY, AVAILITY". | Can duplicates be removed at the source? | De-duplicate at load; treat "NULL" as not identified; try combined portals in the order listed. |
 
 ## Summary
 
 | Class | Count |
 |---|---|
-| Critical blocker | 5 |
-| Business clarification | 19 |
-| Technical clarification | 10 |
+| Class (open findings, r2) | Count |
+|---|---|
+| Critical blocker | 7 (GAP-02, 03, 05, 39, 40, 41, 42) |
+| Business clarification | 22 |
+| Technical clarification | 12 |
 | Known limitation | 2 |
 | Recommended enhancement | 2 |
-| **Total** | **38** (34 BRD-GAP, 4 AI-RECOMMENDATION) |
+| Resolved / deferred | 2 (GAP-01 resolved, GAP-04 deferred) |
+| **Total** | **47** (42 BRD-GAP, 5 AI-RECOMMENDATION) |
 
-**Top blockers:** GAP-03 (masters), GAP-04 (Payer Portal BRD), GAP-01 (Approval Required List), GAP-02 (Medicare bypass skips the existing-patient check), GAP-05 (flow diagram).
+**Top blockers (r2):** GAP-39 (Payor Mapping key columns empty), GAP-42 (Service Area sheet missing), GAP-40 (no paediatric plan flag), GAP-41 (Facility routing columns empty), GAP-02 (Medicare bypass skips the existing-patient check), GAP-05 (flow diagram).
 
 ## Questions to send, grouped by owner
 
 **Intake / business (Moira Behrman, Jaimie Miller, Jennifer Williams)**
-1. What is the Approval Required List, and where is it kept? (GAP-01)
+1. ~~What is the Approval Required List?~~ Resolved. Please correct the 3 future DOBs. (GAP-46)
 2. Should the Medicare bypass check Kantime existing patients first? (GAP-02)
 3. Is an 18-year-old paediatric or adult? (GAP-06)
 4. Is this build Careport only? (GAP-07)
@@ -90,10 +104,16 @@ Every "Suggested default" is a suggestion only, and needs the business or engine
 9. Is Insurance master row order a priority; what are the keyword matching rules; and what are the Mercy matching examples? (GAP-16, 17, 19)
 10. What are the Careport dropdown values, and the non-admit reason for No UHC? (GAP-18, 23)
 11. How should unmapped manual-decline comments, EPIC, and the "Interested" follow-up be handled? (GAP-21, 22)
-12. Send the approved flow diagram and all 4 masters. (GAP-03, 05)
+12. Send the approved flow diagram and the Service Area sheet. (GAP-05, 42)
+
+**Master data owner (CareFlo admin)**
+12a. Re-export Payor Mapping with Agency, Medicare, Commercial, Identifier, Contract, EMR Payor Name and a Paediatric flag. (GAP-39, 40, 47)
+12b. Re-export Facility Master with the routing columns filled, and add the dummy facility. (GAP-41)
+12c. Fix the Restricted Facility master and add the ProMedica and Mercy location rows. (GAP-45)
+12d. Re-export the Exception Keywords Master with Line of Business values, and review the short keywords. (GAP-43, 44)
 
 **Insurance team**
-13. Send the Payer Portal BRD; define inactive and future-effective coverage. (GAP-04, 14)
+13. Payer Portal BRD: when will it be available? (deferred, GAP-04). Define inactive and future-effective coverage. (GAP-14)
 
 **IT / security (client)**
 14. Bot accounts, OTP mailbox, password rotation and concurrent sessions. (GAP-25)

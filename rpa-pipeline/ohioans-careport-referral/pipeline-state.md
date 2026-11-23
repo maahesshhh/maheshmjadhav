@@ -1,11 +1,11 @@
 # Pipeline: ohioans-careport-referral
 | Stage | Status | Output file | Notes |
 |-------|--------|-------------|-------|
-| 0 Intake | done | 00-input/ (not committed) | BRD v1.25 only; no flowchart, samples, masters or reference code |
+| 0 Intake | done | 00-input/ (not committed, contains PHI) | BRD v1.25 + 5 masters (2026-11-23); no flowchart, Service Area sheet, Payer Portal BRD or reference code |
 | 1 Prior work | skipped | — | no past projects available to search |
-| 2 Requirements | done | 02-requirements.json / .md, 02-open_items.md | 106 reqs (104 in scope), 12 conflicts, 16 assumptions (4 High), 10 missing inputs |
-| 3 Gap analysis | done | 03-gap-register.md | 38 findings; 5 critical blockers |
-| GATE | revise requested 2026-11-23 | — | waiting for answers to stage 2-3 questions |
+| 2 Requirements | done r2 (2026-11-23) | 02-requirements.json / .md, 02-open_items.md | r2 adds 5 masters: 112 reqs (108 in scope, 2 deferred), 16 conflicts, 17 assumptions (5 High), 10 blocked |
+| 3 Gap analysis | done r2 | 03-gap-register.md | 47 findings; 7 open critical blockers; GAP-01 resolved, GAP-04 deferred |
+| GATE | awaiting user (after r2) | — | revise #1: masters received; Payer Portal BRD not available |
 | 4 Tech selection | pending | | |
 | 5 Solution design | pending | | |
 | 6 Test design | pending | | |
